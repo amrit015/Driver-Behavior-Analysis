@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/trip"
+    tools:context="com.example.uttam.driver_behaviour.Userlogin">
+
+    <Button
+        android:id="@+id/signUp"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:layout_alignEnd="@+id/imageView123"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="162dp"
+        android:layout_marginEnd="13dp"
+        android:background="@android:color/transparent"
+        android:onClick="signUp"
+        android:text="SIGN UP"
+        android:textColor="@android:color/background_light"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/imageView123"
+        android:layout_width="190dp"
+        android:layout_height="50dp"
+        android:layout_alignTop="@+id/signUp"
+        android:layout_centerHorizontal="true"
+        android:alpha="0.37"
+        app:srcCompat="@drawable/backblue" />
+
+    <ImageView
+        android:id="@+id/imageView223"
+        android:layout_width="30dp"
+        android:layout_height="50dp"
+        app:srcCompat="@drawable/ic_local_taxi_black_24dp"
+        android:layout_alignTop="@+id/signUp"
+        android:layout_alignStart="@+id/signUp" />
+
+    <Button
+        android:id="@+id/logIn"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:layout_alignEnd="@+id/imageView323"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="62dp"
+        android:layout_marginEnd="13dp"
+        android:background="@android:color/transparent"
+        android:text="LOGIN"
+        android:onClick="logIn"
+        android:textColor="@android:color/background_light"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/imageView323"
+        android:layout_width="190dp"
+        android:layout_height="50dp"
+        android:layout_alignTop="@+id/logIn"
+        android:layout_centerHorizontal="true"
+        android:alpha="0.7"
+        app:srcCompat="@drawable/backgreen" />
+
+    <ImageView
+        android:id="@+id/imageView423"
+        android:layout_width="30dp"
+        android:layout_height="50dp"
+        android:layout_alignStart="@+id/logIn"
+        android:layout_alignTop="@+id/logIn"
+        android:rotation="0"
+        app:srcCompat="@drawable/ic_local_taxi_black_24dp" />
+
+    <ViewFlipper
+        android:id="@+id/flip"
+        android:layout_width="170dp"
+        android:layout_height="85dp"
+        android:layout_marginBottom="57dp"
+        android:layout_above="@+id/signUp"
+        android:layout_alignEnd="@+id/signUp">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_airport_shuttle_black_24dp" />
+
+        <ImageView
+            android:id="@+id/imageView7"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_directions_bus_black_24dp" />
+
+        <ImageView
+            android:id="@+id/imageView8"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_traffic_black_24dp" />
+
+        <ImageView
+            android:id="@+id/imageView9"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_local_taxi_black_24dp" />
+
+        <ImageView
+            android:id="@+id/imageView10"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_people_black_24dp" />
+
+    </ViewFlipper>
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="62dp"
+        android:fontFamily="cursive"
+        android:text="Driving Score"
+        android:textAlignment="center"
+        android:textColor="@android:color/background_light"
+        android:textSize="45sp"
+        android:textStyle="bold" />
+
+</RelativeLayout>
