@@ -26,6 +26,7 @@
         </activity>
         <activity android:name=".UserSignUp" android:theme="@style/Full"/>
         <activity android:name=".UserLoginPage" android:theme="@style/Full"/>
+        <activity android:name=".SensorFusionActivity"></activity>
     </application>
 
 </manifest>

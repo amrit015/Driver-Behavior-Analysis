@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -40,27 +39,40 @@
 
     <Button
         android:id="@+id/button"
-        android:layout_width="130dp"
-        android:layout_height="60dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/speedLimit"
+        android:layout_marginBottom="41dp"
         android:background="@drawable/back3"
         android:onClick="started"
         android:text="Start"
         android:textColor="@android:color/background_light"
-        android:textSize="18sp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/speedLimit"
-        android:layout_marginBottom="41dp" />
+        android:textSize="18sp" />
 
     <Button
         android:id="@+id/button2"
-        android:layout_width="130dp"
-        android:layout_height="60dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignTop="@+id/button"
-        android:layout_marginStart="33dp"
+        android:layout_marginStart="25dp"
         android:layout_toEndOf="@+id/button"
         android:background="@drawable/back4"
         android:onClick="display"
         android:text="History"
+        android:textColor="@android:color/background_light"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/button_sensor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/button"
+        android:layout_marginStart="25dp"
+        android:layout_toEndOf="@+id/button2"
+        android:background="@drawable/back4"
+        android:onClick="display"
+        android:text="Sensor"
         android:textColor="@android:color/background_light"
         android:textSize="18sp" />
 

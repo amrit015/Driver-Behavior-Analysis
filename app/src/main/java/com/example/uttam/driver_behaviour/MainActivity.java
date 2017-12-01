@@ -4,54 +4,44 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.support.v7.app.AlertDialog;
-
 
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import java.text.DecimalFormat;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import static com.android.volley.toolbox.Volley.newRequestQueue;
 
 public class MainActivity extends Activity implements SensorEventListener, LocationListener, ValueEventListener{
 
-    private TextView speedView,speedLimit;
     private final int MY_PERMISSION_ACCESS_FINE_LOCATION = 1;
-    private Sensor accSensor, gyroSensor, magnetometerSensor;
-    private SensorManager SM;
-    private LocationManager locationManager;
-    private float currentSpeed = 0.0f;
+    protected boolean isMph = true;
     String speedlimit;
     int limitExceedCount =0;
     String slimitExceedCount;
@@ -61,14 +51,15 @@ public class MainActivity extends Activity implements SensorEventListener, Locat
     long tEnd, tStart;
     String timeString;
     String Name;
-
-
-    private boolean running;
-    protected boolean isMph = true;
     int i = 0;
     int flag =0;
-
     Button button;
+    private TextView speedView, speedLimit;
+    private Sensor accSensor, gyroSensor, magnetometerSensor;
+    private SensorManager SM;
+    private LocationManager locationManager;
+    private float currentSpeed = 0.0f;
+    private boolean running;
     private boolean paused;
     private long start = 0;
     private long pausedStart = 0;
@@ -90,6 +81,14 @@ public class MainActivity extends Activity implements SensorEventListener, Locat
         Name = LoginIntent.getStringExtra("userid");
         firebaseDatabase = FirebaseDatabase.getInstance();
         mRootReference = firebaseDatabase.getReference("Users").child(Name).child("Sessions");
+        Button buttonSensor = findViewById(R.id.button_sensor);
+        buttonSensor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SensorFusionActivity.class);
+                startActivity(intent);
+            }
+        });
     }
     public void started(View view)
     {
@@ -141,8 +140,8 @@ public class MainActivity extends Activity implements SensorEventListener, Locat
         SM.registerListener(this, gyroSensor, SensorManager.SENSOR_DELAY_NORMAL);
         SM.registerListener(this, magnetometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
-        speedView = (TextView)findViewById(R.id.speedView);
-        speedLimit = (TextView)findViewById(R.id.speedLimit);
+        speedView = findViewById(R.id.speedView);
+        speedLimit = findViewById(R.id.speedLimit);
 
 
         //turn on speedometer using GPS
