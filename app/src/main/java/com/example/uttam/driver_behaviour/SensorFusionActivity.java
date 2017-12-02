@@ -40,6 +40,9 @@ public class SensorFusionActivity extends AppCompatActivity implements SensorEve
     int overPitchQ = 0;
     //    int underYawQ = 0;
 //    int underPitchQ = 0;
+
+    int finalOverYaw = 0;
+    int finalOverPitch = 0;
     //counter for accelerometer reading
     int overX = 0;
     int overY = 0;
@@ -105,8 +108,6 @@ public class SensorFusionActivity extends AppCompatActivity implements SensorEve
         textOverY = (TextView) findViewById(R.id.y_over_counter);
         textOverYaw = (TextView) findViewById(R.id.yaw_over_counter);
         textOverPitch = (TextView) findViewById(R.id.pitch_over_counter);
-        textOverYawQ = (TextView) findViewById(R.id.yaw_over_qua_counter);
-        textOverPitchQ = (TextView) findViewById(R.id.pitch_over_qua_counter);
 
         gyroOrientation[0] = 0.0f;
         gyroOrientation[1] = 0.0f;
@@ -239,7 +240,6 @@ public class SensorFusionActivity extends AppCompatActivity implements SensorEve
 
             if (newYawOut > .30 || newYawOut < -.30) {
                 overYaw = overYaw + 1;
-                textOverYaw.setText("Yaw Counter SensorFusion: " + d.format(overYaw));
                 writeCheck = true;
             } else {
 //                underYaw = underYaw + 1;
@@ -247,7 +247,6 @@ public class SensorFusionActivity extends AppCompatActivity implements SensorEve
 
             if (newPitchOut > .12 || newPitchOut < -.12) {
                 overPitch = overPitch + 1;
-                textOverPitch.setText("Pitch Counter SensorFusion: " + d.format(overPitch));
                 writeCheck = true;
             } else {
 //                underPitch = underPitch + 1;
@@ -255,23 +254,20 @@ public class SensorFusionActivity extends AppCompatActivity implements SensorEve
 
             if (newYawOutQ > .30 || newYawOutQ < -.30) {
                 overYawQ = overYawQ + 1;
-                textOverYawQ.setText("Yaw Counter Quaternion :" + d.format(overYawQ));
                 writeCheck = true;
             } else {
-
             }
 
             if (newPitchOutQ > .12 || newPitchOutQ < -.12) {
                 overPitchQ = overPitchQ + 1;
-                textOverPitchQ.setText("Pitch Counter Quaternion :" + d.format(overPitchQ));
                 writeCheck = true;
             } else {
 //                underPitchQ = underPitchQ + 1;
             }
 
-            if (xAccCalibrated > 3 || xAccCalibrated < -.3) {
+            if (xAccCalibrated > 3 || xAccCalibrated < -3) {
                 overX = overX + 1;
-                textOverX.setText("X counter Accelerometer :" + d.format(overX));
+                textOverX.setText(d.format(overX));
                 writeCheck = true;
             } else {
 //                 underX = underX + 1;
@@ -279,11 +275,30 @@ public class SensorFusionActivity extends AppCompatActivity implements SensorEve
 
             if (yAccCalibrated > 2.5 || yAccCalibrated < -2.5) {
                 overY = overY + 1;
-                textOverY.setText("Y counter Accelerometer :" + d.format(overY));
+                textOverY.setText(d.format(overY));
                 writeCheck = true;
             } else {
 //                 underY = underY+1;
             }
+
+            // computing final values for pitch and yaw counters
+            if (overPitch != 0 || overPitchQ != 0) {
+                finalOverPitch = (int) (overPitch + 0.3 * overPitchQ);
+                textOverPitch.setText(d.format(overPitch));
+            }
+
+            if (overYaw != 0 || overYawQ != 0) {
+                finalOverYaw = (int) (overYaw + 0.4 * overYawQ);
+                textOverYaw.setText(d.format(overYaw));
+            }
+
+            /*
+
+            Here, one counter on any sensor doesn't reflect the crossing of threshold for 1 time,
+            it just gives the total number of times the data was recorded during "1 crossing"
+            For one time the user makes a rash turn, counter was reach upto 10 for that one single incident
+
+            */
 
             // only saving if there is change in the counters
             if (writeCheck) {
@@ -295,8 +310,8 @@ public class SensorFusionActivity extends AppCompatActivity implements SensorEve
                 SharedPreferences.Editor editor = sharedPreferences.edit();
 
                 //Adding values to editor
-                editor.putInt("overPitch", overPitch);
-                editor.putInt("overYaw", overYaw);
+                editor.putInt("overPitch", finalOverPitch);
+                editor.putInt("overYaw", finalOverYaw);
                 editor.putInt("overX", overX);
                 editor.putInt("overY", overY);
 
