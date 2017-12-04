@@ -557,10 +557,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         //stop location updates
-        if (mGoogleApiClient != null) {
+      /*  if (mGoogleApiClient != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             Log.d("onLocationChanged", "Removing Location Updates");
-        }
+        }*/
         //Speed
         RequestQueue requestQueue = newRequestQueue(getApplicationContext());
         JsonObjectRequest request = new JsonObjectRequest(com.android.volley.Request.Method.GET, "https://roads.googleapis.com/v1/speedLimits?path=" + location.getLatitude() + "," + location.getLongitude() + "&key=AIzaSyAcXgGZ0d9ujapO3SMXvq5EeVG1Utb4wVI", null, new com.android.volley.Response.Listener<JSONObject>() {
