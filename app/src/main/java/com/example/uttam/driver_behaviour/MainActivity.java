@@ -66,13 +66,13 @@ public class MainActivity extends Activity implements SensorEventListener, Locat
     private long start = 0;
     private long pausedStart = 0;
     private long end = 0;
-    private String SHARED_PREF_NAME = "driverbehaviorapp";
 
     private List<String> details = new ArrayList<>();
 
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference mRootReference;
+    private String SHARED_PREF_NAME = "driverbehaviorapp";
 
 
     @Override

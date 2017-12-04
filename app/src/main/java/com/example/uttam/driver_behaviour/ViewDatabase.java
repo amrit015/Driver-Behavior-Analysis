@@ -6,14 +6,12 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +68,7 @@ public class ViewDatabase extends AppCompatActivity {
                 list.add(s2);
                 list.add(s3);
                 adapter.notifyDataSetChanged();
-                //Toast.makeText(getApplicationContext(),list.toString(),Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(),list.toStringText(),Toast.LENGTH_SHORT).show();
             }
 
             @Override

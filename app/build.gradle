@@ -31,10 +31,10 @@ dependencies {
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.google.firebase:firebase-database:10.0.1'
     compile 'com.google.firebase:firebase-auth:10.0.1'
+    compile 'com.google.android.gms:play-services-location:10.0.1'
+    compile 'com.google.android.gms:play-services-maps:10.0.1'
+    compile 'com.google.maps.android:android-maps-utils:0.5+'
     testCompile 'junit:junit:4.12'
 }
-
-
-
 
 apply plugin: 'com.google.gms.google-services'
