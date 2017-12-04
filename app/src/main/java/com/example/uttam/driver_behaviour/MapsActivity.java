@@ -41,6 +41,9 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -69,19 +72,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button btnSearch, btnDirections, btnStart, btnBack;
     private EditText searchField;
     private TextView speedLimitText, currentSpeedText;
-    private int breaks, turns, suddenAcceleration;
+    private int turns, suddenAcceleration=0;
     private float totalScore = 10;
     private GoogleMap mMap;
     GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
-    Marker mCurrLocationMarker;
+    Marker mCurrLocationMarker,mUserLocationMarker;
     LocationRequest mLocationRequest;
     int PROXIMITY_RADIUS = 10000;
     double latitude, longitude;
     double end_latitude, end_longitude;
     int i = 0;
     long tEnd, tStart;
-    long tSessionEnd, tSessionStart;
     String timeString;
     private boolean running;
     private boolean paused;
@@ -98,9 +100,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private float currentSpeed = 0.0f;
     String speedlimit;
     int flag = 0;
+    private boolean RainAndSnow;
+    private int suddenBreaksCount = 0;
+    long tBreakStart,tBreakEnd;
+    float tempSpeed=0;
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference mRootReference;
+    private DatabaseReference mLocationReference;
+    private DatabaseReference mUsersLocation;
 
     // sensor variables
     // for gryo
@@ -196,6 +204,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Name = LoginIntent.getStringExtra("userid");
         firebaseDatabase = FirebaseDatabase.getInstance();
         mRootReference = firebaseDatabase.getReference("Users").child(Name).child("Sessions");
+        mLocationReference = firebaseDatabase.getReference("Users").child(Name).child("Location");
+        mUsersLocation = firebaseDatabase.getReference("Users");
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -268,6 +278,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (i == 0) {
             btnStart.setText("END");
             tStart = System.currentTimeMillis();
+            tBreakStart = System.currentTimeMillis();
             i = 1;
             String input = searchField.getText().toString().trim();
             if (input.isEmpty()) {
@@ -306,6 +317,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //Toast.makeText(getApplicationContext(),Double.toStringText(elapsedSeconds),Toast.LENGTH_SHORT).show();
             i = 0;
             onadd();
+            details.clear();
             // locationManager.removeUpdates(this);
         }
     }
@@ -378,6 +390,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         details.add("Max Speed: " + sMaxSpeed);
         details.add("LimitExceedTime: " + limitExceedTime);
         details.add("LimitExceedCount: " + slimitExceedCount);
+        details.add("suddenBreaksCount: "+suddenBreaksCount);
+        details.add("suddenAcceleration: "+suddenAcceleration);
+        details.add("RainOrSnow: "+RainAndSnow);
         String id = mRootReference.push().getKey();
         mRootReference.child(id).setValue(details);
 
@@ -526,6 +541,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onConnectionSuspended(int i) {
 
     }
+    
+    private double roundTwoDecimals(double d)
+    {
+        DecimalFormat twoDForm = new DecimalFormat("#.####");
+        return Double.valueOf(twoDForm.format(d));
+    }
 
     @Override
     public void onLocationChanged(final Location location) {
@@ -534,6 +555,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mLastLocation = location;
         if (mCurrLocationMarker != null) {
             mCurrLocationMarker.remove();
+        }
+        if(mUserLocationMarker != null){
+            mUserLocationMarker.remove();
         }
 
         latitude = location.getLatitude();
@@ -548,6 +572,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
         mCurrLocationMarker = mMap.addMarker(markerOptions);
 
+        mUsersLocation.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if (dataSnapshot.hasChild("Location")) {
+                    String loc = dataSnapshot.child("Location").getValue().toString();
+                    if (!loc.isEmpty()) {
+                        String [] strSplit = loc.split("\\s*,\\s*");
+                        String latitudeString = strSplit[0].substring(10, 17);
+                        String longitudeString = strSplit[1].substring(10,18);
+                        double myLat = roundTwoDecimals(location.getLatitude());
+                        double myLng = roundTwoDecimals(location.getLongitude());
+                        Toast.makeText(getApplicationContext(),latitudeString,Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(getApplicationContext(),Double.toString(myLat)+"h",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),longitudeString,Toast.LENGTH_SHORT).show();
+                        float lat = Float.parseFloat(latitudeString);
+                        float lng = Float.parseFloat(longitudeString);
+                        if(lat!=myLat && lng!=myLng) {
+                            LatLng latLng = new LatLng(lat, lng);
+                            MarkerOptions markerOptionsUser = new MarkerOptions();
+                            markerOptionsUser.position(latLng);
+                            markerOptionsUser.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                            mUserLocationMarker = mMap.addMarker(markerOptionsUser);
+                        }
+                    }
+                    //Toast.makeText(getApplicationContext(),loc,Toast.LENGTH_SHORT).show();
+
+                }
+                // Toast.makeText(getApplicationContext(),dataSnapshot.child("Email").getValue().toString(),Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         //move map camera
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
@@ -561,6 +635,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             Log.d("onLocationChanged", "Removing Location Updates");
         }*/
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (com.android.volley.Request.Method.GET, "https://api.darksky.net/forecast/662d2d0ff78f38a9e1405ebdd26049ac/"+location.getLatitude()+","+location.getLongitude(), null, new com.android.volley.Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONObject sys  = response.getJSONObject("currently");
+                            String icon = sys.getString("icon");
+                            if(icon == "rain" || icon =="snow"){
+                                RainAndSnow = true;
+                            }else{
+                                RainAndSnow = false;
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        // mTxtDisplay.setText("Response: " + response.toString());
+                    }
+                }, new com.android.volley.Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // TODO Auto-generated method stub
+
+                    }
+                });
         //Speed
         RequestQueue requestQueue = newRequestQueue(getApplicationContext());
         JsonObjectRequest request = new JsonObjectRequest(com.android.volley.Request.Method.GET, "https://roads.googleapis.com/v1/speedLimits?path=" + location.getLatitude() + "," + location.getLongitude() + "&key=AIzaSyAcXgGZ0d9ujapO3SMXvq5EeVG1Utb4wVI", null, new com.android.volley.Response.Listener<JSONObject>() {
@@ -576,13 +677,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     pause();
                     currentSpeed = location.getSpeed() * 2.23f;
                     CharSequence text = "Speed Limit Exceeded!";
-                    if (elapsed() % 5 == 0) {
-                        long total = breaks + limitExceedCount + suddenAcceleration + turns;
-                        totalScore = total / 4;
-                        breaks = 0;
-                        limitExceedCount = 0;
-                        suddenAcceleration = 0;
-                        turns = 0;
+                    tBreakEnd = System.currentTimeMillis();
+                    long breakElapsed = tBreakStart - tBreakEnd;
+                    double breakElapsedSeconds = breakElapsed/1000.0;
+                    int breakSeconds = (int) (breakElapsedSeconds % 60);
+                    if(breakSeconds%5 == 0){
+                        tempSpeed = currentSpeed;
+                    }
+                    if(breakSeconds%2 == 0 && currentSpeed - tempSpeed <=20){
+                        suddenBreaksCount++;
+                    }
+                    if(breakSeconds%2 == 0 && currentSpeed - tempSpeed >=20){
+                        suddenAcceleration++;
                     }
                     if (currentSpeed > mph) {
                         if (!isRunning()) {
