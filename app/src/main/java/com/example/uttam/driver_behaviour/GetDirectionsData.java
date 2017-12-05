@@ -39,10 +39,20 @@ public class GetDirectionsData extends AsyncTask<Object,String,String> {
     @Override
     protected void onPostExecute(String s) {
 
+        HashMap<String, String> distDirec = null;
         String[] directionsList;
         DataParser parser = new DataParser();
         directionsList = parser.parseDirections(s);
         displayDirection(directionsList);
+        distDirec = parser.DistAndDir(s);
+        duration = distDirec.get("duration");
+        distance = distDirec.get("distance");
+
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title("Duration :"+duration);
+        markerOptions.snippet("Distance "+distance);
+        mMap.addMarker(markerOptions);
 
     }
 
