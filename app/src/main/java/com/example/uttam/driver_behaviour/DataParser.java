@@ -136,6 +136,20 @@ class DataParser {
         }
         return getPaths(jsonArray);
     }
+    
+    public HashMap<String, String> DistAndDir(String jsonData)
+    {
+        JSONArray jsonArray = null;
+        JSONObject jsonObject;
+
+        try {
+            jsonObject = new JSONObject(jsonData);
+            jsonArray = jsonObject.getJSONArray("routes").getJSONObject(0).getJSONArray("legs");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return getDuration(jsonArray);
+    }
 
     public String[] getPaths(JSONArray googleStepsJson )
     {
