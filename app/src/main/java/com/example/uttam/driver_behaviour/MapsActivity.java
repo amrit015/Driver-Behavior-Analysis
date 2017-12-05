@@ -283,6 +283,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     btnStart.setText("END");
                     tStart = System.currentTimeMillis();
                     tBreakStart = System.currentTimeMillis();
+                    suddenBreaksCount=0;
+                    suddenAcceleration=0;
                     i = 1;
                     LatLng latLng = new LatLng(latitude, longitude);
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
@@ -685,7 +687,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if(breakSeconds%5 == 0){
                         tempSpeed = currentSpeed;
                     }
-                    if(breakSeconds%2 == 0 && currentSpeed - tempSpeed <=20){
+                    if(breakSeconds%2 == 0 && tempSpeed >=35 && (tempSpeed - currentSpeed >= 20)){
+                    
                         suddenBreaksCount++;
                     }
                     if(breakSeconds%2 == 0 && currentSpeed - tempSpeed >=20){
