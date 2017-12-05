@@ -274,52 +274,55 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 SensorManager.SENSOR_DELAY_FASTEST);
     }
 
-    public void started(View view) {
-        if (i == 0) {
-            btnStart.setText("END");
-            tStart = System.currentTimeMillis();
-            tBreakStart = System.currentTimeMillis();
-            i = 1;
-            String input = searchField.getText().toString().trim();
-            if (input.isEmpty()) {
+        public void started(View view) {
+        String input = searchField.getText().toString().trim();
+            if(input.isEmpty()){
                 searchField.setError("Cannot be blank");
-            } else {
-                LatLng latLng = new LatLng(latitude, longitude);
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
-                //  btnStart.setVisibility(view.GONE);
-                btnSearch.setVisibility(View.GONE);
-                btnDirections.setVisibility(View.GONE);
-                searchField.setVisibility(View.GONE);
-                //   LinearLayout one = (LinearLayout) findViewById(R.id.linearLayout);
-                //   one.setVisibility(View.INVISIBLE);
-                btnBack.setVisibility(View.VISIBLE);
-                currentSpeedText.setVisibility(View.VISIBLE);
-                speedLimitText.setVisibility(View.VISIBLE);
-            }
-        } else {
+            }else {
+                if (i == 0) {
+                    btnStart.setText("END");
+                    tStart = System.currentTimeMillis();
+                    tBreakStart = System.currentTimeMillis();
+                    i = 1;
+                    LatLng latLng = new LatLng(latitude, longitude);
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                    //  btnStart.setVisibility(view.GONE);
+                    btnSearch.setVisibility(view.GONE);
+                    btnDirections.setVisibility(view.GONE);
+                    searchField.setVisibility(view.GONE);
+                    //   LinearLayout one = (LinearLayout) findViewById(R.id.linearLayout);
+                    //   one.setVisibility(View.INVISIBLE);
+                    btnBack.setVisibility(view.VISIBLE);
+                    currentSpeedText.setVisibility(view.VISIBLE);
+                    speedLimitText.setVisibility(view.VISIBLE);
+                } else {
 
-            btnStart.setText("START");
-            tEnd = System.currentTimeMillis();
-            long tDelta = tEnd - tStart;
-            double elapsedSeconds = tDelta / 1000.0;
-            int hours = (int) (elapsedSeconds / 3600);
-            int minutes = (int) ((elapsedSeconds % 3600) / 60);
-            int seconds = (int) (elapsedSeconds % 60);
-            timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-            long elapsed = stop();
-            double tseconds = ((double) elapsed / 1000000000.0);
-            int shours = (int) (tseconds / 3600);
-            int sminutes = (int) ((tseconds % 3600) / 60);
-            int sseconds = (int) (tseconds % 60);
-            limitExceedTime = String.format("%02d:%02d:%02d", shours, sminutes, sseconds);
-            slimitExceedCount = Integer.toString(limitExceedCount);
-            sMaxSpeed = Integer.toString(maxSpeed);
-            //Toast.makeText(getApplicationContext(),Double.toStringText(elapsedSeconds),Toast.LENGTH_SHORT).show();
-            i = 0;
-            onadd();
-            details.clear();
-            // locationManager.removeUpdates(this);
-        }
+                    btnStart.setText("START");
+                    tEnd = System.currentTimeMillis();
+                    long tDelta = tEnd - tStart;
+                    double elapsedSeconds = tDelta / 1000.0;
+                    int hours = (int) (elapsedSeconds / 3600);
+                    int minutes = (int) ((elapsedSeconds % 3600) / 60);
+                    int seconds = (int) (elapsedSeconds % 60);
+                    timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+                    long elapsed = stop();
+                    double tseconds = ((double) elapsed / 1000000000.0);
+                    int shours = (int) (tseconds / 3600);
+                    int sminutes = (int) ((tseconds % 3600) / 60);
+                    int sseconds = (int) (tseconds % 60);
+                    limitExceedTime = String.format("%02d:%02d:%02d", shours, sminutes, sseconds);
+                    slimitExceedCount = Integer.toString(limitExceedCount);
+                    sMaxSpeed = Integer.toString(maxSpeed);
+                    //Toast.makeText(getApplicationContext(),Double.toStringText(elapsedSeconds),Toast.LENGTH_SHORT).show();
+                    i = 0;
+                    onadd();
+                    details.clear();
+
+                    // locationManager.removeUpdates(this);
+                }
+
+            }
+
     }
 
     public long elapsed() {
