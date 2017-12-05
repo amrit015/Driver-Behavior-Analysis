@@ -575,32 +575,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mUsersLocation.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if (dataSnapshot.hasChild("Location")) {
-                    String loc = dataSnapshot.child("Location").getValue().toString();
+                if (dataSnapshot.hasChild("Location") && !(dataSnapshot.child("UserName").getValue().equals(Name))) {
+                   String loc = dataSnapshot.child("Location").getValue().toString();
                     if (!loc.isEmpty()) {
                         String [] strSplit = loc.split("\\s*,\\s*");
                         String latitudeString = strSplit[0].substring(10, 17);
                         String longitudeString = strSplit[1].substring(10,18);
-                        double myLat = roundTwoDecimals(location.getLatitude());
-                        double myLng = roundTwoDecimals(location.getLongitude());
-                        Toast.makeText(getApplicationContext(),latitudeString,Toast.LENGTH_SHORT).show();
-                        // Toast.makeText(getApplicationContext(),Double.toString(myLat)+"h",Toast.LENGTH_SHORT).show();
-                        Toast.makeText(getApplicationContext(),longitudeString,Toast.LENGTH_SHORT).show();
+                      //  Toast.makeText(getApplicationContext(),latitudeString,Toast.LENGTH_SHORT).show();
+                      //  Toast.makeText(getApplicationContext(),dataSnapshot.child("UserName").getValue().toString(),Toast.LENGTH_SHORT).show();
+                     //   Toast.makeText(getApplicationContext(),longitudeString,Toast.LENGTH_SHORT).show();
                         float lat = Float.parseFloat(latitudeString);
                         float lng = Float.parseFloat(longitudeString);
-                        if(lat!=myLat && lng!=myLng) {
                             LatLng latLng = new LatLng(lat, lng);
                             MarkerOptions markerOptionsUser = new MarkerOptions();
                             markerOptionsUser.position(latLng);
                             markerOptionsUser.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                             mUserLocationMarker = mMap.addMarker(markerOptionsUser);
-                        }
+
                     }
                     //Toast.makeText(getApplicationContext(),loc,Toast.LENGTH_SHORT).show();
 
                 }
-                // Toast.makeText(getApplicationContext(),dataSnapshot.child("Email").getValue().toString(),Toast.LENGTH_SHORT).show();
-            }
+               // Toast.makeText(getApplicationContext(),dataSnapshot.child("Email").getValue().toString(),Toast.LENGTH_SHORT).show();
+                }
+
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
