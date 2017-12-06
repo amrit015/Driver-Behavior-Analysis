@@ -689,6 +689,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     JSONObject obj = response.getJSONArray("speedLimits").getJSONObject(0);
                     speedlimit = obj.getString("speedLimit");
                     //Toast.makeText(getApplicationContext(),speedlimit,Toast.LENGTH_SHORT).show();
+                    mLocationReference.child("latitude").setValue(location.getLatitude());
+                    mLocationReference.child("longitude").setValue(location.getLongitude());
                     double kph = (Double.parseDouble(speedlimit)) * 0.621;
                     mph = (int) Math.round(kph);
                     speedLimitText.setText("Limit:" + "" + Integer.toString(mph));
@@ -858,6 +860,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Log.d("end_lat", "" + end_latitude);
         Log.d("end_lng", "" + end_longitude);
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mLocationReference.setValue("");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mLocationReference.setValue("");
     }
 
     // for sensor
