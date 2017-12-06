@@ -7,8 +7,8 @@
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:weightSum="1"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:weightSum="1">
 
 
         <EditText
@@ -27,50 +27,64 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/map"
 
+        class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        tools:context="com.example.uttam.driver_behaviour.MainActivity"
         android:layout_below="@+id/linearLayout"
-        class="com.google.android.gms.maps.SupportMapFragment" />
+        tools:context="com.example.uttam.driver_behaviour.MainActivity" />
 
     <Button
         android:id="@+id/B_search"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="onClick"
-        android:background="@drawable/backblack"
-        android:text="Search"
-        android:textColor="@android:color/background_light"
-        android:layout_marginEnd="34dp"
         android:layout_below="@+id/linearLayout"
-        android:layout_toStartOf="@+id/B_to" />
+        android:layout_marginEnd="34dp"
+        android:layout_toStartOf="@+id/B_to"
+        android:background="@drawable/backblack"
+        android:onClick="onClick"
+        android:text="Search"
+        android:textColor="@android:color/background_light" />
 
     <Button
         android:id="@+id/B_to"
         android:layout_width="110dp"
         android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/B_start"
+        android:layout_below="@+id/linearLayout"
+        android:layout_marginEnd="54dp"
         android:background="@drawable/backblack"
         android:onClick="onClick"
         android:text="Directions"
-        android:textColor="@android:color/background_light"
-        android:layout_marginEnd="54dp"
-        android:layout_below="@+id/linearLayout"
-        android:layout_alignEnd="@+id/B_start" />
+        android:textColor="@android:color/background_light" />
 
     <Button
         android:id="@+id/B_start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="38dp"
+        android:layout_marginEnd="17dp"
         android:background="@drawable/backblack"
         android:text="Start"
         android:textColor="@android:color/background_light"
-        android:textSize="17sp"
-        android:layout_marginEnd="17dp"
-        android:layout_marginBottom="38dp"
+        android:textSize="17sp" />
+
+    <TextView
+        android:padding="10dp"
+        android:id="@+id/score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="38dp"
+        android:layout_marginLeft="15dp"
+        android:background="@drawable/backblack"
+        android:text="Score"
+        android:textColor="#FFFFFF"
+        android:textSize="17sp" />
 
     <Button
         android:id="@+id/B_back"

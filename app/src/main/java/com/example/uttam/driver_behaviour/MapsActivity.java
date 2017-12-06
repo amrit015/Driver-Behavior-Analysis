@@ -193,6 +193,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     int getFinalOverX = 0;
     int getFinalOverY = 0;
     Boolean isBrakesApplied = false;
+    TextView score;
+    //speedlimit
+    int mph;
 
 
     @Override
@@ -207,6 +210,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         searchField = findViewById(R.id.TF_location);
         speedLimitText = findViewById(R.id.speedLimit);
         currentSpeedText = findViewById(R.id.currentSpeed);
+        score = findViewById(R.id.score);
 
         Intent LoginIntent = getIntent();
         Name = LoginIntent.getStringExtra("userid");
@@ -641,7 +645,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
 
 
-        Toast.makeText(MapsActivity.this, "Your Current Location", Toast.LENGTH_LONG).show();
+//        Toast.makeText(MapsActivity.this, "Your Current Location", Toast.LENGTH_LONG).show();
 
 
         //stop location updates
@@ -682,7 +686,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     speedlimit = obj.getString("speedLimit");
                     //Toast.makeText(getApplicationContext(),speedlimit,Toast.LENGTH_SHORT).show();
                     double kph = (Double.parseDouble(speedlimit)) * 0.621;
-                    int mph = (int) Math.round(kph);
+                    mph = (int) Math.round(kph);
                     speedLimitText.setText("Limit:" + "" + Integer.toString(mph));
                     pause();
                     currentSpeed = location.getSpeed() * 2.23f;
@@ -1235,7 +1239,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private class BehaviorAnalysis extends TimerTask {
-        float speedLimit = 0f;
+
+        float speedLimit;
         int factorSpeed = 0;
         int factorBrakes = 0;
         int factorWeather = 0;
@@ -1247,6 +1252,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         public void run() {
+            if (mph!=0){
+                speedLimit = mph;
+            } else {
+                speedLimit = 0;
+            }
+
             if (currentSpeed != 0) {
                 if (currentSpeed > speedLimit) {
                     factorSpeed = 10;
@@ -1319,13 +1330,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 safeScore = 0;
             }
             final double finalSafeScore = safeScore;
-            if (currentSpeed != 0) {
-                runOnUiThread(new Runnable() {
-                    public void run() {
-//                        Toast.makeText(getApplicationContext(), "Score: " + finalSafeScore, Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    score.setText("Score : " + d.format(finalSafeScore));
+                }
+            });
 
             Log.i("MapsActivity", "count : " + count);
             Log.i("MapsActivity", "score : " + finalSafeScore);
