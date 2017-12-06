@@ -299,7 +299,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 suddenAcceleration = 0;
                 i = 1;
                 LatLng latLng = new LatLng(latitude, longitude);
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));
                 //  btnStart.setVisibility(view.GONE);
                 btnSearch.setVisibility(View.GONE);
                 btnDirections.setVisibility(View.GONE);
@@ -637,8 +638,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
         //move map camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        //mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
 
 
         Toast.makeText(MapsActivity.this, "Your Current Location", Toast.LENGTH_LONG).show();
@@ -740,25 +741,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
-    }
-
-    public void start(View view) {
-        String input = searchField.getText().toString().trim();
-        if (input.isEmpty()) {
-            searchField.setError("Cannot be blank");
-        } else {
-            LatLng latLng = new LatLng(latitude, longitude);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
-            //  btnStart.setVisibility(view.GONE);
-            btnSearch.setVisibility(View.GONE);
-            btnDirections.setVisibility(View.GONE);
-            searchField.setVisibility(View.GONE);
-            //   LinearLayout one = (LinearLayout) findViewById(R.id.linearLayout);
-            //   one.setVisibility(View.INVISIBLE);
-            btnBack.setVisibility(View.VISIBLE);
-            currentSpeedText.setVisibility(View.VISIBLE);
-            speedLimitText.setVisibility(View.VISIBLE);
-        }
     }
 
     public void back(View view) {
