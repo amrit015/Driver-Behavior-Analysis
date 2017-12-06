@@ -221,6 +221,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mRootReference = firebaseDatabase.getReference("Users").child(Name).child("Sessions");
         mLocationReference = firebaseDatabase.getReference("Users").child(Name).child("Location");
         mUsersLocation = firebaseDatabase.getReference("Users");
+        mScoreReference = firebaseDatabase.getReference("Users").child(Name).child("Score");
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -338,6 +339,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //Toast.makeText(getApplicationContext(),Double.toStringText(elapsedSeconds),Toast.LENGTH_SHORT).show();
                 i = 0;
                 onadd();
+                mScoreReference.setValue(safeScore);
                 details.clear();
 
                 // locationManager.removeUpdates(this);
