@@ -72,12 +72,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button btnSearch, btnDirections, btnStart, btnBack;
     private EditText searchField;
     private TextView speedLimitText, currentSpeedText;
-    private int turns, suddenAcceleration=0;
+    private int turns, suddenAcceleration = 0;
     private float totalScore = 10;
     private GoogleMap mMap;
     GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
-    Marker mCurrLocationMarker,mUserLocationMarker;
+    Marker mCurrLocationMarker, mUserLocationMarker;
     LocationRequest mLocationRequest;
     int PROXIMITY_RADIUS = 10000;
     double latitude, longitude;
@@ -102,8 +102,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     int flag = 0;
     private boolean RainAndSnow;
     private int suddenBreaksCount = 0;
-    long tBreakStart,tBreakEnd;
-    float tempSpeed=0;
+    long tBreakStart, tBreakEnd;
+    float tempSpeed = 0;
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference mRootReference;
@@ -115,7 +115,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static final float EPSILON = 0.000000001f;
     public static final int TIME_CONSTANT = 10;
     private static final float NS2S = 1.0f / 1000000000.0f;
-    int count = 0;
+    int count = 1;
     float pitchOut, rollOut, yawOut;
     // counter for sensor fusion
     int overYaw = 0;
@@ -187,6 +187,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Boolean yAccChange = false;
     Boolean xAccChange = false;
 
+    // for 30 sec sensor values reset
+    int getFinalOverYaw = 0;
+    int getFinalOverPitch = 0;
+    int getFinalOverX = 0;
+    int getFinalOverY = 0;
+    Boolean isBrakesApplied = false;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -257,6 +265,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 2000, TIME_CONSTANT);
         // analysing behavior every 2 sec
         fuseTimer.scheduleAtFixedRate(new BehaviorAnalysis(), 1000, 2000);
+        // getting the time in the interval of 30 sec
+//        timeElapsed = (System.nanoTime() - start) % 30;
+        //resetting the sensor values every 30 sec
+        fuseTimer.scheduleAtFixedRate(new ResetSensorValues(), 1000, 30000);
     }
 
     // initializing the sensors
@@ -274,56 +286,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 SensorManager.SENSOR_DELAY_FASTEST);
     }
 
-        public void started(View view) {
+    public void started(View view) {
         String input = searchField.getText().toString().trim();
-            if(input.isEmpty()){
-                searchField.setError("Cannot be blank");
-            }else {
-                if (i == 0) {
-                    btnStart.setText("END");
-                    tStart = System.currentTimeMillis();
-                    tBreakStart = System.currentTimeMillis();
-                    suddenBreaksCount=0;
-                    suddenAcceleration=0;
-                    i = 1;
-                    LatLng latLng = new LatLng(latitude, longitude);
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
-                    //  btnStart.setVisibility(view.GONE);
-                    btnSearch.setVisibility(view.GONE);
-                    btnDirections.setVisibility(view.GONE);
-                    searchField.setVisibility(view.GONE);
-                    //   LinearLayout one = (LinearLayout) findViewById(R.id.linearLayout);
-                    //   one.setVisibility(View.INVISIBLE);
-                    btnBack.setVisibility(view.VISIBLE);
-                    currentSpeedText.setVisibility(view.VISIBLE);
-                    speedLimitText.setVisibility(view.VISIBLE);
-                } else {
+        if (input.isEmpty()) {
+            searchField.setError("Cannot be blank");
+        } else {
+            if (i == 0) {
+                btnStart.setText("END");
+                tStart = System.currentTimeMillis();
+                tBreakStart = System.currentTimeMillis();
+                suddenBreaksCount = 0;
+                suddenAcceleration = 0;
+                i = 1;
+                LatLng latLng = new LatLng(latitude, longitude);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                //  btnStart.setVisibility(view.GONE);
+                btnSearch.setVisibility(View.GONE);
+                btnDirections.setVisibility(View.GONE);
+                searchField.setVisibility(View.GONE);
+                //   LinearLayout one = (LinearLayout) findViewById(R.id.linearLayout);
+                //   one.setVisibility(View.INVISIBLE);
+                btnBack.setVisibility(View.VISIBLE);
+                currentSpeedText.setVisibility(View.VISIBLE);
+                speedLimitText.setVisibility(View.VISIBLE);
+            } else {
 
-                    btnStart.setText("START");
-                    tEnd = System.currentTimeMillis();
-                    long tDelta = tEnd - tStart;
-                    double elapsedSeconds = tDelta / 1000.0;
-                    int hours = (int) (elapsedSeconds / 3600);
-                    int minutes = (int) ((elapsedSeconds % 3600) / 60);
-                    int seconds = (int) (elapsedSeconds % 60);
-                    timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-                    long elapsed = stop();
-                    double tseconds = ((double) elapsed / 1000000000.0);
-                    int shours = (int) (tseconds / 3600);
-                    int sminutes = (int) ((tseconds % 3600) / 60);
-                    int sseconds = (int) (tseconds % 60);
-                    limitExceedTime = String.format("%02d:%02d:%02d", shours, sminutes, sseconds);
-                    slimitExceedCount = Integer.toString(limitExceedCount);
-                    sMaxSpeed = Integer.toString(maxSpeed);
-                    //Toast.makeText(getApplicationContext(),Double.toStringText(elapsedSeconds),Toast.LENGTH_SHORT).show();
-                    i = 0;
-                    onadd();
-                    details.clear();
+                btnStart.setText("START");
+                tEnd = System.currentTimeMillis();
+                long tDelta = tEnd - tStart;
+                double elapsedSeconds = tDelta / 1000.0;
+                int hours = (int) (elapsedSeconds / 3600);
+                int minutes = (int) ((elapsedSeconds % 3600) / 60);
+                int seconds = (int) (elapsedSeconds % 60);
+                timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+                long elapsed = stop();
+                double tseconds = ((double) elapsed / 1000000000.0);
+                int shours = (int) (tseconds / 3600);
+                int sminutes = (int) ((tseconds % 3600) / 60);
+                int sseconds = (int) (tseconds % 60);
+                limitExceedTime = String.format("%02d:%02d:%02d", shours, sminutes, sseconds);
+                slimitExceedCount = Integer.toString(limitExceedCount);
+                sMaxSpeed = Integer.toString(maxSpeed);
+                //Toast.makeText(getApplicationContext(),Double.toStringText(elapsedSeconds),Toast.LENGTH_SHORT).show();
+                i = 0;
+                onadd();
+                details.clear();
 
-                    // locationManager.removeUpdates(this);
-                }
-
+                // locationManager.removeUpdates(this);
             }
+
+        }
 
     }
 
@@ -395,9 +407,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         details.add("Max Speed: " + sMaxSpeed);
         details.add("LimitExceedTime: " + limitExceedTime);
         details.add("LimitExceedCount: " + slimitExceedCount);
-        details.add("suddenBreaksCount: "+suddenBreaksCount);
-        details.add("suddenAcceleration: "+suddenAcceleration);
-        details.add("RainOrSnow: "+RainAndSnow);
+        details.add("suddenBreaksCount: " + suddenBreaksCount);
+        details.add("suddenAcceleration: " + suddenAcceleration);
+        details.add("RainOrSnow: " + RainAndSnow);
         String id = mRootReference.push().getKey();
         mRootReference.child(id).setValue(details);
 
@@ -546,9 +558,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onConnectionSuspended(int i) {
 
     }
-    
-    private double roundTwoDecimals(double d)
-    {
+
+    private double roundTwoDecimals(double d) {
         DecimalFormat twoDForm = new DecimalFormat("#.####");
         return Double.valueOf(twoDForm.format(d));
     }
@@ -561,7 +572,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (mCurrLocationMarker != null) {
             mCurrLocationMarker.remove();
         }
-        if(mUserLocationMarker != null){
+        if (mUserLocationMarker != null) {
             mUserLocationMarker.remove();
         }
 
@@ -581,28 +592,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot.hasChild("Location") && !(dataSnapshot.child("UserName").getValue().equals(Name))) {
-                   String loc = dataSnapshot.child("Location").getValue().toString();
+                    String loc = dataSnapshot.child("Location").getValue().toString();
                     if (!loc.isEmpty()) {
-                        String [] strSplit = loc.split("\\s*,\\s*");
+                        String[] strSplit = loc.split("\\s*,\\s*");
                         String latitudeString = strSplit[0].substring(10, 17);
-                        String longitudeString = strSplit[1].substring(10,18);
-                      //  Toast.makeText(getApplicationContext(),latitudeString,Toast.LENGTH_SHORT).show();
-                      //  Toast.makeText(getApplicationContext(),dataSnapshot.child("UserName").getValue().toString(),Toast.LENGTH_SHORT).show();
-                     //   Toast.makeText(getApplicationContext(),longitudeString,Toast.LENGTH_SHORT).show();
+                        String longitudeString = strSplit[1].substring(10, 18);
+                        //  Toast.makeText(getApplicationContext(),latitudeString,Toast.LENGTH_SHORT).show();
+                        //  Toast.makeText(getApplicationContext(),dataSnapshot.child("UserName").getValue().toString(),Toast.LENGTH_SHORT).show();
+                        //   Toast.makeText(getApplicationContext(),longitudeString,Toast.LENGTH_SHORT).show();
                         float lat = Float.parseFloat(latitudeString);
                         float lng = Float.parseFloat(longitudeString);
-                            LatLng latLng = new LatLng(lat, lng);
-                            MarkerOptions markerOptionsUser = new MarkerOptions();
-                            markerOptionsUser.position(latLng);
-                            markerOptionsUser.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-                            mUserLocationMarker = mMap.addMarker(markerOptionsUser);
+                        LatLng latLng = new LatLng(lat, lng);
+                        MarkerOptions markerOptionsUser = new MarkerOptions();
+                        markerOptionsUser.position(latLng);
+                        markerOptionsUser.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                        mUserLocationMarker = mMap.addMarker(markerOptionsUser);
 
                     }
                     //Toast.makeText(getApplicationContext(),loc,Toast.LENGTH_SHORT).show();
 
                 }
-               // Toast.makeText(getApplicationContext(),dataSnapshot.child("Email").getValue().toString(),Toast.LENGTH_SHORT).show();
-                }
+                // Toast.makeText(getApplicationContext(),dataSnapshot.child("Email").getValue().toString(),Toast.LENGTH_SHORT).show();
+            }
 
 
             @Override
@@ -639,18 +650,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d("onLocationChanged", "Removing Location Updates");
         }*/
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (com.android.volley.Request.Method.GET, "https://api.darksky.net/forecast/662d2d0ff78f38a9e1405ebdd26049ac/"+location.getLatitude()+","+location.getLongitude(), null, new com.android.volley.Response.Listener<JSONObject>() {
+                (com.android.volley.Request.Method.GET, "https://api.darksky.net/forecast/662d2d0ff78f38a9e1405ebdd26049ac/" + location.getLatitude() + "," + location.getLongitude(), null, new com.android.volley.Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            JSONObject sys  = response.getJSONObject("currently");
+                            JSONObject sys = response.getJSONObject("currently");
                             String icon = sys.getString("icon");
-                            if(icon == "rain" || icon =="snow"){
-                                RainAndSnow = true;
-                            }else{
-                                RainAndSnow = false;
-                            }
+                            RainAndSnow = icon == "rain" || icon == "snow";
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -682,16 +689,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     CharSequence text = "Speed Limit Exceeded!";
                     tBreakEnd = System.currentTimeMillis();
                     long breakElapsed = tBreakStart - tBreakEnd;
-                    double breakElapsedSeconds = breakElapsed/1000.0;
+                    double breakElapsedSeconds = breakElapsed / 1000.0;
                     int breakSeconds = (int) (breakElapsedSeconds % 60);
-                    if(breakSeconds%5 == 0){
+                    if (breakSeconds % 5 == 0) {
                         tempSpeed = currentSpeed;
                     }
-                    if(breakSeconds%2 == 0 && tempSpeed >=35 && (tempSpeed - currentSpeed >= 20)){
-                    
+                    if (breakSeconds % 2 == 0 && tempSpeed >= 35 && (tempSpeed - currentSpeed >= 20)) {
+
                         suddenBreaksCount++;
+                        isBrakesApplied = true;
+                    } else {
+                        isBrakesApplied = false;
                     }
-                    if(breakSeconds%2 == 0 && currentSpeed - tempSpeed >=20){
+                    if (breakSeconds % 2 == 0 && currentSpeed - tempSpeed >= 20) {
                         suddenAcceleration++;
                     }
                     if (currentSpeed > mph) {
@@ -948,7 +958,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             writeCheck = false;
             xAccChange = false;
             yAccChange = false;
-            count++;
+            count = count+1;
+            if (count == 2250){
+                count = 1;
+            }
 
             if (newYawOut > .30 || newYawOut < -.30) {
                 overYaw = overYaw + 1;
@@ -1218,20 +1231,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             getRoll = rollOut;
             getYaw = yawOut;
         }
+
     }
 
     private class BehaviorAnalysis extends TimerTask {
         float speedLimit = 0f;
-        Boolean brakes = false;
-        Boolean weather = false;
         int factorSpeed = 0;
         int factorBrakes = 0;
         int factorWeather = 0;
         int factorAcceleration = 0;
         int factorTurn = 0;
         //calculate rateOverYaw and rateOverPitch by taking the division of pitch/yaw over 30 sec interval
-        float rateOverPitch = 0f;
-        float rateOverYaw = 0f;
+        double rateOverPitch = finalOverPitch /count;
+        double rateOverYaw = finalOverYaw/count;
 
         @Override
         public void run() {
@@ -1242,23 +1254,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     factorSpeed = 5;
                 }
 
-                if (brakes = true) {
+                if (isBrakesApplied == true) {
                     factorBrakes = 10;
                 } else {
                     factorBrakes = 0;
                 }
 
-                if (weather = true) {
+                if (RainAndSnow == true) {
                     factorWeather = 10;
                 } else {
                     factorWeather = 0;
                 }
 
                 // writeCheck is the boolean used above to indicate the change in counters in turn and acc
-                if (writeCheck = true) {
+                if (writeCheck == true) {
 
                     if (rateOverPitch < 0.05) {
-                        if (xAccChange = true) {
+                        if (xAccChange == true) {
                             // likely unsafe
                             factorAcceleration = 8;
                         } else {
@@ -1266,7 +1278,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             factorAcceleration = 2;
                         }
                     } else {
-                        if (xAccChange = true) {
+                        if (xAccChange == true) {
                             // definitely unsafe
                             factorAcceleration = 10;
                         } else {
@@ -1276,7 +1288,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
 
                     if (rateOverYaw < 0.02) {
-                        if (yAccChange = true) {
+                        if (yAccChange == true) {
                             // likely unsafe
                             factorTurn = 8;
                         } else {
@@ -1284,7 +1296,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             factorTurn = 2;
                         }
                     } else {
-                        if (yAccChange = true) {
+                        if (yAccChange == true) {
                             // definitely unsafe
                             factorTurn = 10;
                         } else {
@@ -1310,10 +1322,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (currentSpeed != 0) {
                 runOnUiThread(new Runnable() {
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "Score: " + finalSafeScore, Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getApplicationContext(), "Score: " + finalSafeScore, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
+
+            Log.i("MapsActivity", "count : " + count);
+            Log.i("MapsActivity", "score : " + finalSafeScore);
+            Log.i("MapsActivity", "final Pitch rate : " + rateOverPitch);
+            Log.i("MapsActivity", "final Yaw rate : " + rateOverYaw);
+        }
+    }
+
+    private class ResetSensorValues extends TimerTask {
+
+        @Override
+        public void run() {
+            finalOverYaw = finalOverYaw - getFinalOverYaw;
+            finalOverPitch = finalOverPitch - getFinalOverPitch;
+            overX = overX - getFinalOverX;
+            overY = overY - getFinalOverY;
+
+            getFinalOverPitch = finalOverPitch;
+            getFinalOverYaw = finalOverYaw;
+            getFinalOverX = overX;
+            getFinalOverY = overY;
+            Log.i("MapsActivity", "final Pitch : " + finalOverPitch);
+            Log.i("MapsActivity", "final Yaw : " + finalOverYaw);
+            Log.i("MapsActivity", "final overX : " + overX);
+            Log.i("MapsActivity", "final overY : " + overY);
         }
     }
 }

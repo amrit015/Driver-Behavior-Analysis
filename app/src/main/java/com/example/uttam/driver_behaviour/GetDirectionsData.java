@@ -5,10 +5,12 @@ import android.os.AsyncTask;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 
 public class GetDirectionsData extends AsyncTask<Object,String,String> {
