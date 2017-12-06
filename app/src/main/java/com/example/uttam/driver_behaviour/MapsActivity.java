@@ -196,6 +196,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     TextView score;
     //speedlimit
     int mph;
+    //score
+    double safeScore = 0;
+    double previousScore = 0;
 
 
     @Override
@@ -304,7 +307,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 i = 1;
                 LatLng latLng = new LatLng(latitude, longitude);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
                 //  btnStart.setVisibility(view.GONE);
                 btnSearch.setVisibility(View.GONE);
                 btnDirections.setVisibility(View.GONE);
@@ -944,8 +947,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             writeCheck = false;
             xAccChange = false;
             yAccChange = false;
-            count = count+1;
-            if (count == 2250){
+            count = count + 1;
+            if (count == 2250) {
                 count = 1;
             }
 
@@ -1222,19 +1225,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private class BehaviorAnalysis extends TimerTask {
 
+
         float speedLimit;
         int factorSpeed = 0;
         int factorBrakes = 0;
         int factorWeather = 0;
         int factorAcceleration = 0;
         int factorTurn = 0;
+
         //calculate rateOverYaw and rateOverPitch by taking the division of pitch/yaw over 30 sec interval
-        double rateOverPitch = finalOverPitch /count;
-        double rateOverYaw = finalOverYaw/count;
+        double rateOverPitch = finalOverPitch / count;
+        double rateOverYaw = finalOverYaw / count;
 
         @Override
         public void run() {
-            if (mph!=0){
+            if (mph != 0) {
                 speedLimit = mph;
             } else {
                 speedLimit = 0;
@@ -1244,7 +1249,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (currentSpeed > speedLimit) {
                     factorSpeed = 10;
                 } else {
-                    factorSpeed = 5;
+                    factorSpeed = 1;
                 }
 
                 if (isBrakesApplied == true) {
@@ -1302,7 +1307,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     factorTurn = 0;
                 }
             }
-            double safeScore = 0;
             double unsafeScore = 0.3 * factorSpeed + 0.2 * factorBrakes + 0.2 * factorWeather + 0.2 * factorAcceleration + 0.2 * factorTurn;
             if (unsafeScore < 10) {
                 safeScore = 10 - unsafeScore;
@@ -1311,16 +1315,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (unsafeScore > 10) {
                 safeScore = 0;
             }
-            final double finalSafeScore = safeScore;
+//            final double finalSafeScore = safeScore;
+            // taking average with the previous score of user
+            if (previousScore != 0) {
+                safeScore = (safeScore + previousScore) / 2;
+            }
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    score.setText("Score : " + d.format(finalSafeScore));
+                    score.setText("Score : " + d.format(safeScore));
                 }
             });
-
+            previousScore = safeScore;
             Log.i("MapsActivity", "count : " + count);
-            Log.i("MapsActivity", "score : " + finalSafeScore);
+            Log.i("MapsActivity", "score : " + safeScore);
             Log.i("MapsActivity", "final Pitch rate : " + rateOverPitch);
             Log.i("MapsActivity", "final Yaw rate : " + rateOverYaw);
         }
