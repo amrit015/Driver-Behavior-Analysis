@@ -62,34 +62,34 @@
         android:id="@+id/username"
         android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:hint="Username"
-        android:textColor="@android:color/background_light"
-        android:textSize="20sp"
-        android:layout_marginBottom="27dp"
         android:layout_above="@+id/imageView103"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="27dp"
+        android:hint="Username"
+        android:textColor="?attr/actionMenuTextColor"
+        android:textSize="20sp" />
 
     <EditText
         android:id="@+id/password"
         android:layout_width="match_parent"
         android:layout_height="55dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@+id/imageView113"
         android:hint="Password"
         android:inputType="textPassword"
-        android:textColor="@android:color/background_light"
-        android:textSize="20sp"
-        android:layout_alignTop="@+id/imageView113"
-        android:layout_alignParentStart="true" />
+        android:textColor="?attr/actionMenuTextColor"
+        android:textSize="20sp" />
 
     <EditText
         android:id="@+id/email"
         android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:hint="Email"
-        android:textColor="@android:color/background_light"
-        android:textSize="20sp"
         android:layout_above="@+id/imageView113"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="48dp" />
+        android:layout_marginBottom="48dp"
+        android:hint="Email"
+        android:textColor="?attr/actionMenuTextColor"
+        android:textSize="20sp" />
 
 
 </RelativeLayout>
