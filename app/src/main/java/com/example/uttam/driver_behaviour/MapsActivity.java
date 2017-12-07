@@ -203,6 +203,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     int mph;
     //score
     double safeScore = 0;
+    double avgScore =0;
     double previousScore = 0;
     List<Double> scoreList;
     ScoreArrayList scoreArrayList;
@@ -348,12 +349,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 sMaxSpeed = Integer.toString(maxSpeed);
                 //Toast.makeText(getApplicationContext(),Double.toStringText(elapsedSeconds),Toast.LENGTH_SHORT).show();
                 i = 0;
-                onadd();
-                mScoreReference.setValue(safeScore);
+                double result = Math.round(avgScore*100)/100.0;
+                mScoreReference.setValue(result);
                 details.clear();
                 scoreArrayList = new ScoreArrayList(scoreList);
-                Double avgScore = scoreArrayList.getAverage();
-                Toast.makeText(getApplicationContext(), "Trip Score: " + avgScore, Toast.LENGTH_LONG).show();
+                avgScore = scoreArrayList.getAverage();
+                Toast.makeText(getApplicationContext(), "Trip Score: " + result, Toast.LENGTH_LONG).show();
+                onadd();
                 // locationManager.removeUpdates(this);
             }
 
@@ -432,7 +434,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         details.add("suddenBreaksCount: " + suddenBreaksCount);
         details.add("suddenAcceleration: " + suddenAcceleration);
         details.add("RainOrSnow: " + RainAndSnow);
-        String sScore = Double.toString(Math.round(safeScore * 100) / 100.0);
+        String sScore = Double.toString(Math.round(avgScore * 100) / 100.0);
         details.add("Score :" + sScore);
         SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy' 'HH:mm:ss", Locale.US);
         sdf.setTimeZone(TimeZone.getTimeZone("GMT-6"));
@@ -618,7 +620,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mUsersLocation.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if (dataSnapshot.hasChild("Location") && !(dataSnapshot.child("UserName").getValue().equals(Name))) {
+                if (dataSnapshot.hasChild("Location") && dataSnapshot.hasChild("Score") && !(dataSnapshot.child("UserName").getValue().equals(Name))) {
                     String loc = dataSnapshot.child("Location").getValue().toString();
                     if (!loc.isEmpty()) {
                         String[] strSplit = loc.split("\\s*,\\s*");
@@ -632,7 +634,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         LatLng latLng = new LatLng(lat, lng);
                         MarkerOptions markerOptionsUser = new MarkerOptions();
                         markerOptionsUser.position(latLng);
-                        markerOptionsUser.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                        String sScore = dataSnapshot.child("Score").getValue().toString();
+                        if(Float.parseFloat(sScore)<=5.0){
+                            markerOptionsUser.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                        }else{
+                            markerOptionsUser.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        }
+
                         mUserLocationMarker = mMap.addMarker(markerOptionsUser);
 
                     }
@@ -1284,13 +1292,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (currentSpeed != 0) {
                 if (currentSpeed > speedLimit) {
                     factorSpeed = 10;
-                   runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(), "You speed is above the limit, please drive within the speedlimit", Toast.LENGTH_LONG).show();
-                        playSound();
-                    }
-                });
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "You speed is above the limit, please drive within the speedlimit", Toast.LENGTH_LONG).show();
+                            playSound();
+                        }
+                    });
                 } else {
                     factorSpeed = 1;
                 }
