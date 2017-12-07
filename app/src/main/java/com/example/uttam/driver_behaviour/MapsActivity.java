@@ -53,9 +53,12 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -108,7 +111,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference mRootReference;
     private DatabaseReference mLocationReference;
-    private DatabaseReference mUsersLocation;
+    private DatabaseReference mUsersLocation, mScoreReference;
 
     // sensor variables
     // for gryo
@@ -220,8 +223,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         firebaseDatabase = FirebaseDatabase.getInstance();
         mRootReference = firebaseDatabase.getReference("Users").child(Name).child("Sessions");
         mLocationReference = firebaseDatabase.getReference("Users").child(Name).child("Location");
-        mUsersLocation = firebaseDatabase.getReference("Users");
         mScoreReference = firebaseDatabase.getReference("Users").child(Name).child("Score");
+        mUsersLocation = firebaseDatabase.getReference("Users");
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -341,7 +344,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 onadd();
                 mScoreReference.setValue(safeScore);
                 details.clear();
-
                 // locationManager.removeUpdates(this);
             }
 
@@ -420,6 +422,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         details.add("suddenBreaksCount: " + suddenBreaksCount);
         details.add("suddenAcceleration: " + suddenAcceleration);
         details.add("RainOrSnow: " + RainAndSnow);
+        String sScore = Double.toString(Math.round(safeScore *100)/100.0);
+        details.add("Score :"+sScore);
+        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy' 'HH:mm:ss", Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT-6"));
+        details.add("DataAndTime :"+sdf.format(new Date()));
         String id = mRootReference.push().getKey();
         mRootReference.child(id).setValue(details);
 
@@ -647,8 +654,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
         //move map camera
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        //mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+        if(i==1) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+        }
 
 
 //        Toast.makeText(MapsActivity.this, "Your Current Location", Toast.LENGTH_LONG).show();
@@ -764,6 +773,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btnBack.setVisibility(View.GONE);
         currentSpeedText.setVisibility(View.INVISIBLE);
         speedLimitText.setVisibility(View.INVISIBLE);
+        mMap.stopAnimation();
+        
     }
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -863,6 +874,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d("end_lat", "" + end_latitude);
         Log.d("end_lng", "" + end_longitude);
     }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -874,7 +886,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onDestroy();
         mLocationReference.setValue("");
     }
-
     // for sensor
     // Sensor Fusion involving Accelerometer, Gyroscope, and Magnetometer
     // Quaternion
