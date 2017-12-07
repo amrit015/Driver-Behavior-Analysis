@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -59,24 +61,16 @@ public class ViewDatabase extends AppCompatActivity {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 counter++;
                 String s0 = dataSnapshot.child("0").getValue().toString();
-                String s1 = dataSnapshot.child("1").getValue().toString();
-                String s2 = dataSnapshot.child("2").getValue().toString();
-                String s3 = dataSnapshot.child("3").getValue().toString();
-                String s4 = dataSnapshot.child("4").getValue().toString();
-                String s5 = dataSnapshot.child("5").getValue().toString();
-                String s6 = dataSnapshot.child("6").getValue().toString();
+                String s7 = dataSnapshot.child("7").getValue().toString();
+                String s8 = dataSnapshot.child("8").getValue().toString();
+
                 list.add("              Session: "+counter);
+                list.add(s8);
                 list.add(s0);
-                list.add(s1);
-                list.add(s2);
-                list.add(s3);
-                list.add(s4);
-                list.add(s5);
-                list.add(s6);
+                list.add(s7);
                 adapter.notifyDataSetChanged();
                 //Toast.makeText(getApplicationContext(),list.toStringText(),Toast.LENGTH_SHORT).show();
             }
-
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
@@ -98,8 +92,4 @@ public class ViewDatabase extends AppCompatActivity {
             }
         });
     }
-
-
-
-
 }
