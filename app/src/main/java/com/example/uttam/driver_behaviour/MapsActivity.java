@@ -11,8 +11,10 @@ import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
@@ -202,6 +204,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //score
     double safeScore = 0;
     double previousScore = 0;
+    List<Double> scoreList;
+    ScoreArrayList scoreArrayList;
 
 
     @Override
@@ -225,6 +229,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mLocationReference = firebaseDatabase.getReference("Users").child(Name).child("Location");
         mScoreReference = firebaseDatabase.getReference("Users").child(Name).child("Score");
         mUsersLocation = firebaseDatabase.getReference("Users");
+        // creating list to add score
+        scoreList = new ArrayList<>();
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -308,6 +314,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 tBreakStart = System.currentTimeMillis();
                 suddenBreaksCount = 0;
                 suddenAcceleration = 0;
+                scoreList.clear();
                 i = 1;
                 LatLng latLng = new LatLng(latitude, longitude);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -344,6 +351,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 onadd();
                 mScoreReference.setValue(safeScore);
                 details.clear();
+                scoreArrayList = new ScoreArrayList(scoreList);
+                Double avgScore = scoreArrayList.getAverage();
+                Toast.makeText(getApplicationContext(), "Trip Score: " + avgScore, Toast.LENGTH_LONG).show();
                 // locationManager.removeUpdates(this);
             }
 
@@ -422,11 +432,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         details.add("suddenBreaksCount: " + suddenBreaksCount);
         details.add("suddenAcceleration: " + suddenAcceleration);
         details.add("RainOrSnow: " + RainAndSnow);
-        String sScore = Double.toString(Math.round(safeScore *100)/100.0);
-        details.add("Score :"+sScore);
+        String sScore = Double.toString(Math.round(safeScore * 100) / 100.0);
+        details.add("Score :" + sScore);
         SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy' 'HH:mm:ss", Locale.US);
         sdf.setTimeZone(TimeZone.getTimeZone("GMT-6"));
-        details.add("DataAndTime :"+sdf.format(new Date()));
+        details.add("DataAndTime :" + sdf.format(new Date()));
         String id = mRootReference.push().getKey();
         mRootReference.child(id).setValue(details);
 
@@ -654,7 +664,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
         //move map camera
-        if(i==1) {
+        if (i == 1) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
         }
@@ -774,7 +784,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         currentSpeedText.setVisibility(View.INVISIBLE);
         speedLimitText.setVisibility(View.INVISIBLE);
         mMap.stopAnimation();
-        
+
     }
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -886,6 +896,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onDestroy();
         mLocationReference.setValue("");
     }
+
     // for sensor
     // Sensor Fusion involving Accelerometer, Gyroscope, and Magnetometer
     // Quaternion
@@ -1251,7 +1262,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private class BehaviorAnalysis extends TimerTask {
 
-
         float speedLimit;
         int factorSpeed = 0;
         int factorBrakes = 0;
@@ -1274,12 +1284,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (currentSpeed != 0) {
                 if (currentSpeed > speedLimit) {
                     factorSpeed = 10;
+                   runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), "You speed is above the limit, please drive within the speedlimit", Toast.LENGTH_LONG).show();
+                        playSound();
+                    }
+                });
                 } else {
                     factorSpeed = 1;
                 }
 
                 if (isBrakesApplied == true) {
                     factorBrakes = 10;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "You shouldn't apply sudden brakes, please be careful", Toast.LENGTH_LONG).show();
+                            playSound();
+                        }
+                    });
                 } else {
                     factorBrakes = 0;
                 }
@@ -1293,7 +1317,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // writeCheck is the boolean used above to indicate the change in counters in turn and acc
                 if (writeCheck == true) {
 
-                    if (rateOverPitch < 0.05) {
+                    if (rateOverPitch < 0.04) {
                         if (xAccChange == true) {
                             // likely unsafe
                             factorAcceleration = 8;
@@ -1305,13 +1329,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if (xAccChange == true) {
                             // definitely unsafe
                             factorAcceleration = 10;
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(), "Harsh acceleration has been detected, please be safe", Toast.LENGTH_LONG).show();
+                                    playSound();
+                                }
+                            });
                         } else {
                             // probably unsafe
-                            factorAcceleration = 6;
+                            factorAcceleration = 8;
                         }
                     }
 
-                    if (rateOverYaw < 0.02) {
+                    if (rateOverYaw < 0.01) {
                         if (yAccChange == true) {
                             // likely unsafe
                             factorTurn = 8;
@@ -1321,11 +1352,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         }
                     } else {
                         if (yAccChange == true) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(), "Harsh unsafe turn has been detected, please be safe", Toast.LENGTH_LONG).show();
+                                    playSound();
+                                }
+                            });
                             // definitely unsafe
                             factorTurn = 10;
                         } else {
                             // probably unsafe
-                            factorTurn = 6;
+                            factorTurn = 8;
                         }
                     }
                 } else {
@@ -1346,6 +1384,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (previousScore != 0) {
                 safeScore = (safeScore + previousScore) / 2;
             }
+            scoreList.add(safeScore);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1378,6 +1417,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.i("MapsActivity", "final overX : " + overX);
             Log.i("MapsActivity", "final overY : " + overY);
         }
+    }
+
+    private void playSound() {
+        MediaPlayer player = MediaPlayer.create(this,
+                Settings.System.DEFAULT_NOTIFICATION_URI);
+        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                mediaPlayer.reset();
+                mediaPlayer.release();
+            }
+        });
+        player.start();
     }
 }
 
