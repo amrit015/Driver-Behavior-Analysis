@@ -15,6 +15,7 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
@@ -23,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -207,6 +209,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     double previousScore = 0;
     List<Double> scoreList;
     ScoreArrayList scoreArrayList;
+    RelativeLayout mainLayout;
 
 
     @Override
@@ -222,6 +225,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         speedLimitText = findViewById(R.id.speedLimit);
         currentSpeedText = findViewById(R.id.currentSpeed);
         score = findViewById(R.id.score);
+        mainLayout = findViewById(R.id.main_layout);
 
         Intent LoginIntent = getIntent();
         Name = LoginIntent.getStringExtra("userid");
@@ -1295,7 +1299,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(getApplicationContext(), "You speed is above the limit, please drive within the speedlimit", Toast.LENGTH_LONG).show();
+                            Snackbar.make(mainLayout, "You speed is above the limit, please drive within the speedlimit", Snackbar.LENGTH_SHORT).show();
                             playSound();
                         }
                     });
@@ -1308,7 +1312,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(getApplicationContext(), "You shouldn't apply sudden brakes, please be careful", Toast.LENGTH_LONG).show();
+                            Snackbar.make(mainLayout, "You shouldn't apply sudden brakes, please be careful", Snackbar.LENGTH_SHORT).show();
                             playSound();
                         }
                     });
@@ -1340,7 +1344,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(getApplicationContext(), "Harsh acceleration has been detected, please be safe", Toast.LENGTH_LONG).show();
+                                    Snackbar.make(mainLayout, "Harsh acceleration has been detected, please be safe", Snackbar.LENGTH_SHORT).show();
                                     playSound();
                                 }
                             });
@@ -1363,7 +1367,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(getApplicationContext(), "Harsh unsafe turn has been detected, please be safe", Toast.LENGTH_LONG).show();
+                                    Snackbar.make(mainLayout, "Harsh unsafe turn has been detected, please be safe", Snackbar.LENGTH_SHORT).show();
                                     playSound();
                                 }
                             });
