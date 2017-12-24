@@ -34,7 +34,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/linearLayout"
-        tools:context="com.example.uttam.driver_behaviour.MainActivity" />
+        tools:context="com.example.uttam.driver_behaviour.MapsActivity" />
 
     <Button
         android:id="@+id/B_search"

@@ -9,14 +9,13 @@ import android.widget.Button;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+// main menu
 public class MainMenu extends AppCompatActivity{
 
     private Button btnNewTrip,btnHistory;
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference mRootReference;
     String Name;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,5 +44,4 @@ public class MainMenu extends AppCompatActivity{
             }
         });
     }
-    
 }

@@ -12,7 +12,7 @@ import com.google.maps.android.PolyUtil;
 import java.io.IOException;
 import java.util.HashMap;
 
-
+// for navigation in maps
 public class GetDirectionsData extends AsyncTask<Object,String,String> {
 
     GoogleMap mMap;
@@ -25,8 +25,6 @@ public class GetDirectionsData extends AsyncTask<Object,String,String> {
         mMap = (GoogleMap)objects[0];
         url = (String)objects[1];
         latLng = (LatLng)objects[2];
-
-
 
         DownloadUrl downloadUrl = new DownloadUrl();
         try {
@@ -58,12 +56,10 @@ public class GetDirectionsData extends AsyncTask<Object,String,String> {
 
     }
 
-    public void displayDirection(String[] directionsList)
-    {
+    public void displayDirection(String[] directionsList){
 
         int count = directionsList.length;
-        for(int i = 0;i<count;i++)
-        {
+        for(int i = 0;i<count;i++){
             PolylineOptions options = new PolylineOptions();
             options.color(Color.RED);
             options.width(10);
@@ -72,11 +68,5 @@ public class GetDirectionsData extends AsyncTask<Object,String,String> {
             mMap.addPolyline(options);
         }
     }
-
-
-
-
-
-
 }
 

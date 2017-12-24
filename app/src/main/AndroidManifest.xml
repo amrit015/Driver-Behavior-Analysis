@@ -16,23 +16,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
 
-        </activity>
         <activity android:name=".ViewDatabase" />
-        <activity android:name=".Userlogin" android:theme="@style/Full">
+        <activity
+            android:name=".HomePageActivity"
+            android:theme="@style/Full">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".UserSignUp" android:theme="@style/Full"/>
-        <activity android:name=".UserLoginPage" android:theme="@style/Full"/>
-        <activity android:name=".SensorFusionActivity"></activity>
+        <activity
+            android:name=".UserSignUpActivity"
+            android:theme="@style/Full" />
+        <activity
+            android:name=".UserLoginPageActivity"
+            android:theme="@style/Full" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCAcfy-02UHSu2F6WeQ1rhQhkCr51eBL9g" />
+
         <activity android:name=".MainMenu"></activity>
         <activity
             android:name=".MapsActivity"

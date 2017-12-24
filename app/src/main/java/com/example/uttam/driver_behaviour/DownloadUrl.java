@@ -10,7 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-
+//
 public class DownloadUrl {
 
     public String readUrl(String myUrl) throws IOException
@@ -28,10 +28,8 @@ public class DownloadUrl {
             StringBuffer sb = new StringBuffer();
 
             String line = "";
-            while((line = br.readLine()) != null)
-            {
+            while((line = br.readLine()) != null) {
                 sb.append(line);
-
             }
 
             data = sb.toString();

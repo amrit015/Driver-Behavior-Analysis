@@ -10,9 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
+// used for Maps
 class DataParser {
-
 
     private HashMap<String,String> getDuration(JSONArray googleDirectionsJson)
     {
@@ -20,9 +19,7 @@ class DataParser {
         String duration = "";
         String distance ="";
 
-
         try {
-
             duration = googleDirectionsJson.getJSONObject(0).getJSONObject("duration").getString("text");
             distance = googleDirectionsJson.getJSONObject(0).getJSONObject("distance").getString("text");
 
@@ -32,11 +29,8 @@ class DataParser {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-
         return googleDirectionsMap;
     }
-
 
     private HashMap<String, String> getPlace(JSONObject googlePlaceJson)
     {
@@ -47,7 +41,6 @@ class DataParser {
         String longitude = "";
         String reference = "";
         Log.d("getPlace", "Entered");
-
 
         try {
             if(!googlePlaceJson.isNull("name"))
@@ -78,11 +71,8 @@ class DataParser {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         return googlePlacesMap;
     }
-
-
 
     private List<HashMap<String,String>> getPlaces(JSONArray jsonArray)
     {

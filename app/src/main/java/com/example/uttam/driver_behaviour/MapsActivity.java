@@ -68,6 +68,11 @@ import java.util.TimerTask;
 
 import static com.android.volley.toolbox.Volley.newRequestQueue;
 
+/*
+ Main Page after Login
+ Here, maps are initialized, sensors are initialized and sensor end values are computed,
+ behavior is analyzed and score is computed.
+*/
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -287,8 +292,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 2000, TIME_CONSTANT);
         // analysing behavior every 2 sec
         fuseTimer.scheduleAtFixedRate(new BehaviorAnalysis(), 1000, 2000);
-        // getting the time in the interval of 30 sec
-//        timeElapsed = (System.nanoTime() - start) % 30;
+
         //resetting the sensor values every 30 sec
         fuseTimer.scheduleAtFixedRate(new ResetSensorValues(), 1000, 30000);
     }
@@ -308,12 +312,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 SensorManager.SENSOR_DELAY_FASTEST);
     }
 
+    // maps are initialized
     public void started(View view) {
         String input = searchField.getText().toString().trim();
         if (input.isEmpty()) {
             searchField.setError("Cannot be blank");
         } else {
             if (i == 0) {
+                // during the start of a trip, values are initialized
                 btnStart.setText("END");
                 tStart = System.currentTimeMillis();
                 tBreakStart = System.currentTimeMillis();
@@ -324,17 +330,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 LatLng latLng = new LatLng(latitude, longitude);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
-                //  btnStart.setVisibility(view.GONE);
                 btnSearch.setVisibility(View.GONE);
                 btnDirections.setVisibility(View.GONE);
                 searchField.setVisibility(View.GONE);
-                //   LinearLayout one = (LinearLayout) findViewById(R.id.linearLayout);
-                //   one.setVisibility(View.INVISIBLE);
                 btnBack.setVisibility(View.VISIBLE);
                 currentSpeedText.setVisibility(View.VISIBLE);
                 speedLimitText.setVisibility(View.VISIBLE);
             } else {
-
+                // values are computed after the end of thr trip
                 btnStart.setText("START");
                 tEnd = System.currentTimeMillis();
                 long tDelta = tEnd - tStart;
@@ -353,20 +356,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 sMaxSpeed = Integer.toString(maxSpeed);
                 //Toast.makeText(getApplicationContext(),Double.toStringText(elapsedSeconds),Toast.LENGTH_SHORT).show();
                 i = 0;
-                double result = Math.round(avgScore*100)/100.0;
-                mScoreReference.setValue(result);
                 details.clear();
                 scoreArrayList = new ScoreArrayList(scoreList);
                 avgScore = scoreArrayList.getAverage();
+                double result = Math.round(avgScore*100)/100.0;
+                mScoreReference.setValue(result);
                 Toast.makeText(getApplicationContext(), "Trip Score: " + result, Toast.LENGTH_LONG).show();
                 onadd();
-                // locationManager.removeUpdates(this);
             }
-
         }
-
     }
 
+    // time is computed
     public long elapsed() {
         if (isRunning()) {
             if (isPaused())
@@ -430,6 +431,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // adding values to the firebase database
     public void onadd() {
         details.add("Total Time: " + timeString);
         details.add("Max Speed: " + sMaxSpeed);
@@ -445,9 +447,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         details.add("DataAndTime :" + sdf.format(new Date()));
         String id = mRootReference.push().getKey();
         mRootReference.child(id).setValue(details);
-
     }
 
+    // checking google play services
     private boolean CheckGooglePlayServices() {
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
         int result = googleAPI.isGooglePlayServicesAvailable(this);
@@ -463,7 +465,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     /**
-     * Manipulates the map once available.
+     * Manipulate the map once available.
      * This callback is triggered when the map is ready to be used.
      * This is where we can add markers or lines, add listeners or move the camera. In this case,
      * we just add a marker near Sydney, Australia.
@@ -487,7 +489,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
         }
-
         mMap.setOnMarkerDragListener(this);
         mMap.setOnMarkerClickListener(this);
     }
@@ -501,11 +502,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mGoogleApiClient.connect();
     }
 
+    // for search
     public void onClick(View v) {
         Object dataTransfer[] = new Object[2];
-        //GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
-
-
         switch (v.getId()) {
             case R.id.B_search: {
                 mMap.clear();
@@ -525,7 +524,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
 
                     if (addressList != null) {
-                        //  for (int i = 0; i < addressList.size(); i++) {
                         Address myAddress = addressList.get(0);
                         LatLng latLng = new LatLng(myAddress.getLatitude(), myAddress.getLongitude());
                         markerOptions.position(latLng);
@@ -533,7 +531,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
                         end_latitude = myAddress.getLatitude();
                         end_longitude = myAddress.getLongitude();
-                        // }
                     }
 
                 }
@@ -552,6 +549,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // to get direction to the destination
     private String getDirectionsUrl() {
         StringBuilder googleDirectionsUrl = new StringBuilder("https://maps.googleapis.com/maps/api/directions/json?");
         googleDirectionsUrl.append("origin=" + latitude + "," + longitude);
@@ -572,7 +570,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return (googlePlacesUrl.toString());
     }
 
-
+    // on maps connected
     @Override
     public void onConnected(Bundle bundle) {
         mLocationRequest = new LocationRequest();
@@ -597,6 +595,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return Double.valueOf(twoDForm.format(d));
     }
 
+    // on changing location
     @Override
     public void onLocationChanged(final Location location) {
         Log.d("onLocationChanged", "entered");
@@ -611,7 +610,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         latitude = location.getLatitude();
         longitude = location.getLongitude();
-
 
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
@@ -630,9 +628,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         String[] strSplit = loc.split("\\s*,\\s*");
                         String latitudeString = strSplit[0].substring(10, 17);
                         String longitudeString = strSplit[1].substring(10, 18);
-                        //  Toast.makeText(getApplicationContext(),latitudeString,Toast.LENGTH_SHORT).show();
-                        //  Toast.makeText(getApplicationContext(),dataSnapshot.child("UserName").getValue().toString(),Toast.LENGTH_SHORT).show();
-                        //   Toast.makeText(getApplicationContext(),longitudeString,Toast.LENGTH_SHORT).show();
                         float lat = Float.parseFloat(latitudeString);
                         float lng = Float.parseFloat(longitudeString);
                         LatLng latLng = new LatLng(lat, lng);
@@ -646,12 +641,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         }
 
                         mUserLocationMarker = mMap.addMarker(markerOptionsUser);
-
                     }
-                    //Toast.makeText(getApplicationContext(),loc,Toast.LENGTH_SHORT).show();
-
                 }
-                // Toast.makeText(getApplicationContext(),dataSnapshot.child("Email").getValue().toString(),Toast.LENGTH_SHORT).show();
             }
 
 
@@ -675,6 +666,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+
         //move map camera
         if (i == 1) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -682,14 +674,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
 
-//        Toast.makeText(MapsActivity.this, "Your Current Location", Toast.LENGTH_LONG).show();
-
-
         //stop location updates
       /*  if (mGoogleApiClient != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             Log.d("onLocationChanged", "Removing Location Updates");
         }*/
+
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (com.android.volley.Request.Method.GET, "https://api.darksky.net/forecast/662d2d0ff78f38a9e1405ebdd26049ac/" + location.getLatitude() + "," + location.getLongitude(), null, new com.android.volley.Response.Listener<JSONObject>() {
 
@@ -713,7 +703,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     }
                 });
-        //Speed
+
+        //Computing Speed and speed limit
+        //computing if harsh acceleratio and/or brake is applied
         RequestQueue requestQueue = newRequestQueue(getApplicationContext());
         JsonObjectRequest request = new JsonObjectRequest(com.android.volley.Request.Method.GET, "https://roads.googleapis.com/v1/speedLimits?path=" + location.getLatitude() + "," + location.getLongitude() + "&key=AIzaSyAcXgGZ0d9ujapO3SMXvq5EeVG1Utb4wVI", null, new com.android.volley.Response.Listener<JSONObject>() {
             @Override
@@ -777,7 +769,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
         requestQueue.add(request);
         currentSpeedText.setText("Speed: " + new DecimalFormat("##").format(currentSpeed));
-
     }
 
     @Override
@@ -785,8 +776,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    // on pressing Back
     public void back(View view) {
-        // btnStart.setVisibility(view.VISIBLE);
         btnSearch.setVisibility(View.VISIBLE);
         btnDirections.setVisibility(View.VISIBLE);
         searchField.setVisibility(View.VISIBLE);
@@ -909,7 +900,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mLocationReference.setValue("");
     }
 
-    // for sensor
+    // SENSOR PART, COMPUTATION AND ANALYSIS
     // Sensor Fusion involving Accelerometer, Gyroscope, and Magnetometer
     // Quaternion
     // Accelerometer
@@ -948,6 +939,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    // getting accelerometer values and calibrating the accelerometer
     private void calibrateAccelerometer() {
         if (!mInitialized) {
             xPreviousAcc = xAccelerometer;
@@ -964,6 +956,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // computing quaternion values
     private void computeQuaternion() {
         float R[] = new float[9];
         float I[] = new float[9];
@@ -991,6 +984,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // updating the values for accelerometer, sensor fusion and quaternion
+    // and computing the counters for quaternion, sensor fusion, accelerometer
     private void updateValues() {
         if (newPitchOut != 0 && newPitchOutQ != 0 && newYawOut != 0 && newYawOutQ != 0 && xAccCalibrated != 0 && yAccCalibrated != 0) {
             writeCheck = false;
@@ -1050,9 +1045,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             */
 
-            // only saving if there is change in the counters
+            // only saving if there is change in the counters (for future purpose also)
             if (writeCheck) {
-
                 //Creating a shared preference
                 SharedPreferences sharedPreferences = MapsActivity.this.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
@@ -1072,12 +1066,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // accelerometer
     public void calculateAccMagOrientation() {
         if (SensorManager.getRotationMatrix(rotationMatrix, null, accel, magnet)) {
             SensorManager.getOrientation(rotationMatrix, accMagOrientation);
         }
     }
 
+    // gyroscope
     public void gyroFunction(SensorEvent event) {
         // don't start until first accelerometer/magnetometer orientation has been acquired
         if (accMagOrientation == null)
@@ -1134,6 +1130,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return result;
     }
 
+    // gyroscope
     private void getRotationVectorFromGyro(float[] gyroValues,
                                            float[] deltaRotationVector,
                                            float timeFactor) {
@@ -1216,6 +1213,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return resultMatrix;
     }
 
+    // sensor fusion values are computed at every 10 sec as initialized earlier
     private class calculateFusedOrientationTask extends TimerTask {
         float filter_coefficient = 0.85f;
         float oneMinusCoeff = 1.0f - filter_coefficient;
@@ -1269,12 +1267,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             getRoll = rollOut;
             getYaw = yawOut;
         }
-
     }
 
+    // analysis of driver behavior, computation is done at every 2 sec
     private class BehaviorAnalysis extends TimerTask {
 
         float speedLimit;
+        // factors needed for analysis
         int factorSpeed = 0;
         int factorBrakes = 0;
         int factorWeather = 0;
@@ -1287,6 +1286,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         public void run() {
+            // see flowchart in the report to better understand the analysis
             if (mph != 0) {
                 speedLimit = mph;
             } else {
@@ -1391,7 +1391,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (unsafeScore > 10) {
                 safeScore = 0;
             }
-//            final double finalSafeScore = safeScore;
+
             // taking average with the previous score of user
             if (previousScore != 0) {
                 safeScore = (safeScore + previousScore) / 2;
@@ -1411,6 +1411,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // sensor values computed for the last 30 sec
     private class ResetSensorValues extends TimerTask {
 
         @Override
@@ -1431,6 +1432,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // for notification - sound
     private void playSound() {
         MediaPlayer player = MediaPlayer.create(this,
                 Settings.System.DEFAULT_NOTIFICATION_URI);

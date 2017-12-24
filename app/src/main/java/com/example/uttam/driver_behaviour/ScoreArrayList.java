@@ -4,6 +4,7 @@ import java.util.List;
 
 /**
  * Created by Amrit on 12/6/2017.
+ * to compute the average score of the trip
  */
 
 public class ScoreArrayList {

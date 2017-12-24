@@ -15,10 +15,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 /**
- * Created by Uttam on 11/14/17.
+ * user log in page, checking user on database
  */
 
-public class UserLoginPage extends AppCompatActivity implements  View.OnClickListener{
+public class UserLoginPageActivity extends AppCompatActivity implements  View.OnClickListener{
 
     private EditText mEmail,mPassword;
     private Button btnLogin;
@@ -28,55 +28,49 @@ public class UserLoginPage extends AppCompatActivity implements  View.OnClickLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.user_login);
+        setContentView(R.layout.activity_user_login_page);
 
         database = FirebaseDatabase.getInstance();
         LoginRef = database.getReference("Users");
         mEmail = (EditText) findViewById(R.id.email);
         mPassword = (EditText) findViewById(R.id.password);
         btnLogin = (Button)findViewById(R.id.logIn);
-
         btnLogin.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
         if(view == btnLogin) {
+            // logging users
            Login();
-
         }
     }
 
-    private void mainMenu() {
-
-    }
 
     public void Login() {
-        //Toast.makeText(getApplicationContext(),"yup",Toast.LENGTH_SHORT).show();
+        // getting users info
         final String userid = mEmail.getText().toString();
         final String password = mPassword.getText().toString();
 
+        // checking users
         if (userid.isEmpty()) {
             mEmail.setError("Username cannot be blank");
         } else if (password.isEmpty()) {
             mPassword.setError("Password cannot be blank");
         } else {
+
+            // checking if users exists on database
             LoginRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-
                     if (dataSnapshot.hasChild(userid)) {
                         String pass = dataSnapshot.child(userid).child("Password").getValue().toString();
                         String UserN = dataSnapshot.child(userid).child("UserName").getValue().toString();
 
                         if (password.equals(pass)) {
-
                             mPassword.setError(null);
                             Toast.makeText(getApplicationContext(),"Correct",Toast.LENGTH_SHORT).show();
-                           // Intent i = new Intent(UserLoginPage.this,MainActivity.class);
-                           // i.putExtra("userid",UserN);
-                           // startActivity(i);
-                            Intent i = new Intent(UserLoginPage.this,MapsActivity.class);
+                            Intent i = new Intent(UserLoginPageActivity.this,MainMenu.class);
                             i.putExtra("userid",UserN);
                             startActivity(i);
                             LoginRef.removeEventListener(this);
