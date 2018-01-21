@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-// used for Maps
+// used for Maps, for navigation and for determining distance and duration of the trip
+// json data is obtained containing the latitute and longitude
 class DataParser {
 
-    private HashMap<String,String> getDuration(JSONArray googleDirectionsJson)
-    {
+    private HashMap<String,String> getDuration(JSONArray googleDirectionsJson){
         HashMap<String,String> googleDirectionsMap = new HashMap<>();
         String duration = "";
         String distance ="";
@@ -32,8 +32,7 @@ class DataParser {
         return googleDirectionsMap;
     }
 
-    private HashMap<String, String> getPlace(JSONObject googlePlaceJson)
-    {
+    private HashMap<String, String> getPlace(JSONObject googlePlaceJson) {
         HashMap<String, String> googlePlacesMap = new HashMap<>();
         String placeName = "-NA-";
         String vicinity = "-NA-";

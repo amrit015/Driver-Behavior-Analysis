@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Uttam on 11/13/17.
+ * To fetch the previous data (history) saved on the Firebase
  */
 
 public class ViewDatabase extends AppCompatActivity {

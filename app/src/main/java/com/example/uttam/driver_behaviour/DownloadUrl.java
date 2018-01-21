@@ -10,7 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-//
+// to fetch the url from the web service using http
 public class DownloadUrl {
 
     public String readUrl(String myUrl) throws IOException
@@ -20,9 +20,11 @@ public class DownloadUrl {
         HttpURLConnection urlConnection = null;
         try {
             URL url = new URL(myUrl);
+            // http connection to connect with the client
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.connect();
 
+            // to read data from  the htpp client
             inputStream = urlConnection.getInputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             StringBuffer sb = new StringBuffer();

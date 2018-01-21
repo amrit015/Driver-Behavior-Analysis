@@ -222,11 +222,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        btnDirections = findViewById(R.id.B_to);
-        btnSearch = findViewById(R.id.B_search);
-        btnStart = findViewById(R.id.B_start);
+        btnDirections = findViewById(R.id.location_directions);
+        btnSearch = findViewById(R.id.location_search);
+        btnStart = findViewById(R.id.navigation_start);
         btnBack = findViewById(R.id.B_back);
-        searchField = findViewById(R.id.TF_location);
+        searchField = findViewById(R.id.query_location);
         speedLimitText = findViewById(R.id.speedLimit);
         currentSpeedText = findViewById(R.id.currentSpeed);
         score = findViewById(R.id.score);
@@ -242,14 +242,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // creating list to add score
         scoreList = new ArrayList<>();
 
-        btnStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                started(view);
-            }
-        });
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
         }
@@ -262,10 +254,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d("onCreate", "Google Play Services available.");
         }
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used
+        // maps are initialized here
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        // starting the navigation after user searches the destination on the map
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startTrip(view);
+            }
+        });
 
         // computing sensor values
         gyroOrientation[0] = 0.0f;
@@ -312,14 +313,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 SensorManager.SENSOR_DELAY_FASTEST);
     }
 
-    // maps are initialized
-    public void started(View view) {
+    // after maps are initialized and destination is set, the trip is started
+    // check whether the location has been given by the user
+    public void startTrip(View view) {
+        //get location of the destination
         String input = searchField.getText().toString().trim();
         if (input.isEmpty()) {
             searchField.setError("Cannot be blank");
         } else {
             if (i == 0) {
+                //DURING THE TRIP
                 // during the start of a trip, values are initialized
+                // change the button to display "End" to end the trip
                 btnStart.setText("END");
                 tStart = System.currentTimeMillis();
                 tBreakStart = System.currentTimeMillis();
@@ -327,9 +332,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 suddenAcceleration = 0;
                 scoreList.clear();
                 i = 1;
+                //getting the latitude and longitude of the user
                 LatLng latLng = new LatLng(latitude, longitude);
+                // move map camera
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                // making changes to the UI
                 btnSearch.setVisibility(View.GONE);
                 btnDirections.setVisibility(View.GONE);
                 searchField.setVisibility(View.GONE);
@@ -337,6 +345,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 currentSpeedText.setVisibility(View.VISIBLE);
                 speedLimitText.setVisibility(View.VISIBLE);
             } else {
+                // END OF THE TRIP
                 // values are computed after the end of thr trip
                 btnStart.setText("START");
                 tEnd = System.currentTimeMillis();
@@ -354,9 +363,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 limitExceedTime = String.format("%02d:%02d:%02d", shours, sminutes, sseconds);
                 slimitExceedCount = Integer.toString(limitExceedCount);
                 sMaxSpeed = Integer.toString(maxSpeed);
-                //Toast.makeText(getApplicationContext(),Double.toStringText(elapsedSeconds),Toast.LENGTH_SHORT).show();
                 i = 0;
                 details.clear();
+                //getting average score of the trip
                 scoreArrayList = new ScoreArrayList(scoreList);
                 avgScore = scoreArrayList.getAverage();
                 double result = Math.round(avgScore*100)/100.0;
@@ -502,15 +511,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mGoogleApiClient.connect();
     }
 
-    // for search
+    // for search, for creating marker and putting marker on the map
     public void onClick(View v) {
         Object dataTransfer[] = new Object[2];
         switch (v.getId()) {
-            case R.id.B_search: {
+            case R.id.location_search: {
                 mMap.clear();
-                EditText tf_location = findViewById(R.id.TF_location);
+                EditText tf_location = findViewById(R.id.query_location);
                 String location = tf_location.getText().toString();
                 List<Address> addressList = null;
+                // creating markeroptions
                 MarkerOptions markerOptions = new MarkerOptions();
                 Log.d("location = ", location);
 
@@ -523,27 +533,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         e.printStackTrace();
                     }
 
+                    // getting user address and putting marker
                     if (addressList != null) {
                         Address myAddress = addressList.get(0);
                         LatLng latLng = new LatLng(myAddress.getLatitude(), myAddress.getLongitude());
+                        //setting the position of the marker
                         markerOptions.position(latLng);
                         mMap.addMarker(markerOptions);
                         mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
                         end_latitude = myAddress.getLatitude();
                         end_longitude = myAddress.getLongitude();
                     }
-
                 }
             }
             break;
 
-            case R.id.B_to:
+            // getting the destination and passing to Asynctask for navigation
+            case R.id.location_directions:
                 dataTransfer = new Object[3];
                 String url = getDirectionsUrl();
                 GetDirectionsData getDirectionsData = new GetDirectionsData();
                 dataTransfer[0] = mMap;
                 dataTransfer[1] = url;
                 dataTransfer[2] = new LatLng(end_latitude, end_longitude);
+                // execute asynctask
                 getDirectionsData.execute(dataTransfer);
                 break;
         }
@@ -570,7 +583,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return (googlePlacesUrl.toString());
     }
 
-    // on maps connected
+    // on maps connected, checking permission for location services
     @Override
     public void onConnected(Bundle bundle) {
         mLocationRequest = new LocationRequest();
@@ -611,6 +624,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         latitude = location.getLatitude();
         longitude = location.getLongitude();
 
+        // getting the updated location, putting markers
+        // adding the user to the firebase to determine the UNSAFE drivers nearby
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
@@ -634,6 +649,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         MarkerOptions markerOptionsUser = new MarkerOptions();
                         markerOptionsUser.position(latLng);
                         String sScore = dataSnapshot.child("Score").getValue().toString();
+                        // assigning red to unsafe drivers and green to safe drivers
                         if(Float.parseFloat(sScore)<=5.0){
                             markerOptionsUser.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                         }else{
@@ -680,6 +696,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d("onLocationChanged", "Removing Location Updates");
         }*/
 
+      // implementation of DarkSky API
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (com.android.volley.Request.Method.GET, "https://api.darksky.net/forecast/662d2d0ff78f38a9e1405ebdd26049ac/" + location.getLatitude() + "," + location.getLongitude(), null, new com.android.volley.Response.Listener<JSONObject>() {
 
@@ -705,7 +722,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 });
 
         //Computing Speed and speed limit
-        //computing if harsh acceleratio and/or brake is applied
+        //computing if harsh acceleration and/or brake is applied
         RequestQueue requestQueue = newRequestQueue(getApplicationContext());
         JsonObjectRequest request = new JsonObjectRequest(com.android.volley.Request.Method.GET, "https://roads.googleapis.com/v1/speedLimits?path=" + location.getLatitude() + "," + location.getLongitude() + "&key=AIzaSyAcXgGZ0d9ujapO3SMXvq5EeVG1Utb4wVI", null, new com.android.volley.Response.Listener<JSONObject>() {
             @Override
@@ -730,15 +747,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         tempSpeed = currentSpeed;
                     }
                     if (breakSeconds % 2 == 0 && tempSpeed >= 35 && (tempSpeed - currentSpeed >= 20)) {
-
+                        // harsh brake case
                         suddenBreaksCount++;
                         isBrakesApplied = true;
                     } else {
                         isBrakesApplied = false;
                     }
                     if (breakSeconds % 2 == 0 && currentSpeed - tempSpeed >= 20) {
+                        // sudden acceleration case
                         suddenAcceleration++;
                     }
+                    // determining speed and over the speed cases
                     if (currentSpeed > mph) {
                         if (!isRunning()) {
                             start();
@@ -776,8 +795,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    // on pressing Back
+    // on pressing Back during he TRIP
     public void back(View view) {
+        // making changes to the UI
         btnSearch.setVisibility(View.VISIBLE);
         btnDirections.setVisibility(View.VISIBLE);
         searchField.setVisibility(View.VISIBLE);
@@ -787,11 +807,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         currentSpeedText.setVisibility(View.INVISIBLE);
         speedLimitText.setVisibility(View.INVISIBLE);
         mMap.stopAnimation();
-
     }
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
+    // checking location permissions
     public boolean checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -858,6 +878,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    // marker locations
     @Override
     public boolean onMarkerClick(Marker marker) {
         marker.setDraggable(true);

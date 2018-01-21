@@ -32,30 +32,6 @@
         android:layout_centerHorizontal="true" />
 
     <Button
-        android:id="@+id/mainLeaderboard"
-        android:layout_width="150dp"
-        android:layout_height="50dp"
-        android:background="@android:color/transparent"
-        android:text="Leaderboard"
-        android:textColor="@android:color/background_light"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_alignTop="@+id/imageView343"
-        android:layout_alignStart="@+id/mainHelp" />
-
-    <Button
-        android:id="@+id/mainHelp"
-        android:layout_width="150dp"
-        android:layout_height="50dp"
-        android:background="@android:color/transparent"
-        android:text="Help"
-        android:textColor="@android:color/background_light"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_alignTop="@+id/imageView303"
-        android:layout_alignStart="@+id/mainHistory" />
-
-    <Button
         android:id="@+id/mainMyScore"
         android:layout_width="150dp"
         android:layout_height="50dp"
@@ -85,26 +61,6 @@
         android:layout_below="@+id/imageView313"
         android:layout_alignStart="@+id/imageView313"
         android:layout_marginTop="44dp" />
-
-    <ImageView
-        android:id="@+id/imageView343"
-        android:layout_width="190dp"
-        android:layout_height="50dp"
-        android:alpha="0.7"
-        app:srcCompat="@drawable/backgreen"
-        android:layout_above="@+id/mainHelp"
-        android:layout_alignStart="@+id/imageView303"
-        android:layout_marginBottom="16dp" />
-
-    <ImageView
-        android:id="@+id/imageView303"
-        android:layout_width="190dp"
-        android:layout_height="50dp"
-        android:alpha="0.7"
-        app:srcCompat="@drawable/backgreen"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/imageView323"
-        android:layout_marginBottom="76dp" />
 
     <ImageView
         android:id="@+id/imageView313"
